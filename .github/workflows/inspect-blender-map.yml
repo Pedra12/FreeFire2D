@@ -20,7 +20,7 @@ jobs:
       - name: Install Blender and unzip
         run: |
           sudo apt-get update
-          sudo apt-get install -y blender unzip
+          sudo apt-get install -y blender unzip python3-numpy
 
       - name: Extract and inspect map archive
         id: inspect
@@ -52,8 +52,22 @@ jobs:
           import bpy, os, sys
           source = os.environ["BLEND_FILE"]
           target = os.path.abspath("output/free-fire-map.glb")
+          print("BLENDER_PYTHON:", sys.version)
+          print("PYTHON_PATH:", sys.path)
+          import numpy
+          print("NUMPY_VERSION:", numpy.__version__)
           bpy.ops.wm.open_mainfile(filepath=source)
-          # Pack linked image assets into the Blender file before exporting.
+          # Record missing external textures; keep all images that are available.
+          missing = []
+          for image in bpy.data.images:
+              if image.source == 'FILE':
+                  path = bpy.path.abspath(image.filepath)
+                  if not os.path.exists(path) and not image.packed_file:
+                      missing.append((image.name, image.filepath))
+          with open("output/missing-textures.txt", "w") as report:
+              for name, path in missing:
+                  report.write(f"{name}: {path}\n")
+          print("MISSING_TEXTURES:", missing)
           try:
               bpy.ops.file.pack_all()
           except Exception as exc:
@@ -61,7 +75,10 @@ jobs:
           print("SCENE_OBJECTS:", len(bpy.data.objects))
           for obj in bpy.data.objects:
               print("OBJECT:", obj.name, obj.type)
-          bpy.ops.export_scene.gltf(filepath=target, export_format='GLB', export_apply=True)
+          result = bpy.ops.export_scene.gltf(filepath=target, export_format='GLB', export_apply=True)
+          print("EXPORT_RESULT:", result)
+          if 'FINISHED' not in result or not os.path.isfile(target) or os.path.getsize(target) < 1024:
+              raise RuntimeError("GLB export did not produce a valid output file")
           print("EXPORTED:", target, os.path.getsize(target))
           PY
           BLEND_FILE="${{ steps.inspect.outputs.BLEND_FILE }}" blender -b --python /tmp/export_map.py 2>&1 | tee output/blender-conversion.log
