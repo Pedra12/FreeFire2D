@@ -19,10 +19,15 @@ var weapon_name: String = "RIFLE"
 var weapon_damage: float = 25.0
 var weapon_fire_interval: float = 0.12
 var weapon_index: int = 0
-var rifle_ammo: int = 30
-var rifle_reserve: int = 120
-var pistol_ammo: int = 12
-var pistol_reserve: int = 48
+var weapon_magazines: Array[int] = [30, 12, 8, 45]
+var weapon_reserves: Array[int] = [120, 48, 40, 180]
+var weapon_names: Array[String] = ["RIFLE", "PISTOLA", "ESCOPETA", "SMG"]
+var weapon_damages: Array[float] = [25.0, 18.0, 58.0, 13.0]
+var weapon_intervals: Array[float] = [0.12, 0.28, 0.78, 0.075]
+var armor_points: float = 75.0
+var backpack_level: int = 2
+var death_state: bool = false
+var reload_pose_time: float = 0.0
 var is_reloading: bool = false
 var is_aiming: bool = false
 var is_firing: bool = false
@@ -37,7 +42,10 @@ var weapon: MeshInstance3D
 var shot_ray: RayCast3D
 var left_leg_pivot: Node3D
 var right_leg_pivot: Node3D
+var left_arm_pivot: Node3D
+var right_arm_pivot: Node3D
 var walk_clock: float = 0.0
+var recoil_amount: float = 0.0
 
 func _ready() -> void:
 	health = max_health
@@ -49,6 +57,8 @@ func _ready() -> void:
 	stats_changed.emit()
 
 func _physics_process(delta: float) -> void:
+	if death_state:
+		return
 	var input_vector := Input.get_vector("move_left", "move_right", "move_forward", "move_back")
 	var basis_yaw := Basis(Vector3.UP, camera_yaw)
 	var direction := basis_yaw * Vector3(input_vector.x, 0.0, input_vector.y)
@@ -77,6 +87,17 @@ func _physics_process(delta: float) -> void:
 			left_leg_pivot.rotation.x = move_toward(left_leg_pivot.rotation.x, 0.0, delta * 3.0)
 			right_leg_pivot.rotation.x = move_toward(right_leg_pivot.rotation.x, 0.0, delta * 3.0)
 	fire_cooldown = maxf(0.0, fire_cooldown - delta)
+	recoil_amount = move_toward(recoil_amount, 0.0, delta * 3.5)
+	if is_instance_valid(right_arm_pivot):
+		var pose := -0.75 if is_aiming else -0.48
+		if is_reloading:
+			pose = -0.12
+		right_arm_pivot.rotation.x = lerpf(right_arm_pivot.rotation.x, pose - recoil_amount, delta * 9.0)
+	if is_instance_valid(left_arm_pivot):
+		var left_pose := -0.58 if is_aiming else -0.34
+		if is_reloading:
+			left_pose = -0.08
+		left_arm_pivot.rotation.x = lerpf(left_arm_pivot.rotation.x, left_pose, delta * 8.0)
 	if is_reloading:
 		reload_timer -= delta
 		if reload_timer <= 0.0:
@@ -143,11 +164,13 @@ func _build_character() -> void:
 
 	var left_arm := Node3D.new()
 	left_arm.position = Vector3(-0.42, 1.58, 0.0)
+	left_arm_pivot = left_arm
 	add_child(left_arm)
 	_make_capsule_on(left_arm, 0.13, 0.68, Vector3(0.0, -0.30, 0.0), fabric)
 	_make_box_on(left_arm, Vector3(0.19, 0.14, 0.18), Vector3(0.0, -0.65, -0.02), armor)
 	var right_arm := Node3D.new()
 	right_arm.position = Vector3(0.42, 1.58, 0.0)
+	right_arm_pivot = right_arm
 	add_child(right_arm)
 	_make_capsule_on(right_arm, 0.13, 0.68, Vector3(0.0, -0.30, -0.04), fabric)
 	_make_box_on(right_arm, Vector3(0.19, 0.14, 0.18), Vector3(0.0, -0.65, -0.08), armor)
@@ -232,7 +255,9 @@ func shoot() -> void:
 			reload()
 		return
 	fire_cooldown = weapon_fire_interval
+	recoil_amount = 0.22 if weapon_index == 2 else 0.12
 	ammo -= 1
+	weapon_magazines[weapon_index] = ammo
 	if is_instance_valid(shot_ray):
 		shot_ray.force_raycast_update()
 		if shot_ray.is_colliding():
@@ -242,34 +267,20 @@ func shoot() -> void:
 	stats_changed.emit()
 
 func switch_weapon() -> void:
-	if weapon_index == 0:
-		rifle_ammo = ammo
-		rifle_reserve = reserve_ammo
-		weapon_index = 1
-		weapon_name = "PISTOLA"
-		magazine_size = 12
-		weapon_damage = 18.0
-		weapon_fire_interval = 0.28
-		ammo = pistol_ammo
-		reserve_ammo = pistol_reserve
-		if is_instance_valid(weapon):
-			var pistol_mesh := BoxMesh.new()
-			pistol_mesh.size = Vector3(0.11, 0.12, 0.42)
-			weapon.mesh = pistol_mesh
-	else:
-		pistol_ammo = ammo
-		pistol_reserve = reserve_ammo
-		weapon_index = 0
-		weapon_name = "RIFLE"
-		magazine_size = 30
-		weapon_damage = 25.0
-		weapon_fire_interval = 0.12
-		ammo = rifle_ammo
-		reserve_ammo = rifle_reserve
-		if is_instance_valid(weapon):
-			var rifle_mesh := BoxMesh.new()
-			rifle_mesh.size = Vector3(0.13, 0.13, 0.85)
-			weapon.mesh = rifle_mesh
+	weapon_magazines[weapon_index] = ammo
+	weapon_reserves[weapon_index] = reserve_ammo
+	weapon_index = (weapon_index + 1) % weapon_names.size()
+	weapon_name = weapon_names[weapon_index]
+	magazine_size = [30, 12, 8, 45][weapon_index]
+	weapon_damage = weapon_damages[weapon_index]
+	weapon_fire_interval = weapon_intervals[weapon_index]
+	ammo = weapon_magazines[weapon_index]
+	reserve_ammo = weapon_reserves[weapon_index]
+	var weapon_size := [Vector3(0.13, 0.13, 0.85), Vector3(0.11, 0.12, 0.42), Vector3(0.18, 0.18, 0.72), Vector3(0.12, 0.13, 0.62)][weapon_index]
+	if is_instance_valid(weapon):
+		var mesh := BoxMesh.new()
+		mesh.size = weapon_size
+		weapon.mesh = mesh
 	is_reloading = false
 	reload_timer = 0.0
 	fire_cooldown = 0.0
@@ -293,12 +304,15 @@ func _finish_reload() -> void:
 	var loaded := mini(needed, reserve_ammo)
 	ammo += loaded
 	reserve_ammo -= loaded
+	weapon_magazines[weapon_index] = ammo
+	weapon_reserves[weapon_index] = reserve_ammo
 	is_reloading = false
 	reload_timer = 0.0
 	stats_changed.emit()
 
 func add_ammo(amount: int) -> void:
 	reserve_ammo += amount
+	weapon_reserves[weapon_index] = reserve_ammo
 	stats_changed.emit()
 
 func heal(amount: float) -> void:
@@ -306,7 +320,18 @@ func heal(amount: float) -> void:
 	stats_changed.emit()
 
 func take_damage(amount: float) -> void:
-	health = maxf(0.0, health - amount)
+	if death_state:
+		return
+	var absorbed := minf(armor_points, amount * 0.65)
+	armor_points -= absorbed
+	health = maxf(0.0, health - (amount - absorbed))
 	stats_changed.emit()
 	if health <= 0.0:
+		death_state = true
+		is_firing = false
+		is_aiming = false
+		velocity = Vector3.ZERO
 		set_physics_process(false)
+		var tween := create_tween()
+		tween.tween_property(self, "rotation:z", deg_to_rad(82.0), 0.7)
+		tween.parallel().tween_property(self, "position:y", -0.35, 0.7)
