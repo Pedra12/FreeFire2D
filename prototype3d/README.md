@@ -5,7 +5,7 @@ Projeto independente em Godot 4.3, orientado para Android em paisagem e jogabili
 ## Sistemas implementados
 - Personagens militares 3D rigados de 80 ossos e materiais PBR, com animações compatíveis, câmera em terceira pessoa, mira aproximada e controle por toque.
 - Movimento, corrida, salto, recarga, disparo contínuo e poses procedurais de braços e pernas.
-- Quatro classes de arma: rifle, pistola, escopeta e submetralhadora, com dano, cadência e reservas independentes.
+- Quatro classes de arma com modelos GLB próprios: rifle de assalto, pistola, escopeta e submetralhadora, com dano, cadência e reservas independentes.
 - Colete com absorção de dano, mochila com aumento de reservas, kits médicos e caixas de munição.
 - Bots com perseguição, verificação de linha de visão, disparos, animação simples e queda ao serem eliminados.
 - Zona segura que diminui ao longo da partida e causa dano fora dos limites.
@@ -15,7 +15,7 @@ Projeto independente em Godot 4.3, orientado para Android em paisagem e jogabili
 - Fluxos de CI separados para importar/testar o projeto 3D e exportar o APK Android.
 
 ## Limitações que continuam abertas
-Este ainda é um protótipo de produção, não um jogo completo nem uma cópia visual de Free Fire. A cena integra soldados militares mid-poly rigados de 80 ossos (modelos Male Soldier 02/03/04, licença MIT), além de carros, árvores, iluminação e mobiliário 3D CC0 da Kenney. O nível de detalhe ainda não equivale a um jogo comercial como Free Fire; os modelos de armas de combate e o conjunto completo de animações de combate ainda precisam ser integrados. As armas de combate ainda precisam de modelos próprios adequados; alguns movimentos usam fallback procedural e a disponibilidade de clips varia por personagem.
+Este ainda é um protótipo de produção, não um jogo completo nem uma cópia visual de Free Fire. A cena integra soldados militares mid-poly rigados (modelos Male Soldier 02/03/04, licença MIT), clips retargetados de idle/caminhada/corrida, armas GLB e som de disparo CC0, além de carros, árvores, iluminação e mobiliário 3D CC0 da Kenney. O nível de detalhe ainda não equivale a um jogo comercial como Free Fire; os modelos de armas de combate e o conjunto completo de animações de combate ainda precisam ser integrados. As armas de combate ainda precisam de modelos próprios adequados; alguns movimentos usam fallback procedural e a disponibilidade de clips varia por personagem.
 
 Ainda são necessários:
 - Modelos 3D externos de qualidade para personagens, armas, veículos e cenário, com rig, materiais e licenças compatíveis.
@@ -34,7 +34,7 @@ Ainda são necessários:
 5. Só então projetar multiplayer online com servidor autoritativo, sincronização, salas e proteção contra trapaças.
 
 ## Assets e licenças
-Os cenários e props usados nesta etapa são do catálogo Kenney, publicados sob CC0 1.0. Os soldados Male Soldier 02/03/04 são de models.codelove.in, licenciados sob MIT; manter a licença incorporada nos arquivos GLB e consultar https://models.codelove.in/licensing/. O pipeline baixa os recursos antes de importar/exportar. Fonte Kenney: https://github.com/Hidencod/tge-assets e https://kenney.nl/support. Os arquivos baixados não ficam versionados no repositório; execute `.github/scripts/download-kenney-assets.sh` antes de abrir o projeto localmente.
+Os cenários e props usados nesta etapa são do catálogo Kenney, publicados sob CC0 1.0. Os soldados Male Soldier 02/03/04 são de models.codelove.in, licenciados sob MIT; manter a licença incorporada nos arquivos GLB e consultar https://models.codelove.in/licensing/. As armas e o áudio de disparo vêm do FPS Asset Kit / OpenGameArt, sob CC0. O pipeline baixa os recursos antes de importar/exportar. Fonte Kenney: https://github.com/Hidencod/tge-assets e https://kenney.nl/support. Os arquivos baixados não ficam versionados no repositório; execute `.github/scripts/download-kenney-assets.sh` antes de abrir o projeto localmente.
 
 ## Abrir e exportar
 Importe esta pasta no Godot 4.3 pelo arquivo `project.godot`. Antes da importação local, execute `.github/scripts/download-kenney-assets.sh` na raiz do repositório. O preset Android exporta para ARM64. A compilação Android precisa concluir o fluxo de CI e o APK precisa ser instalado e testado em aparelho real antes de ser considerado pronto.
