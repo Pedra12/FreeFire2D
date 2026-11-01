@@ -70,15 +70,15 @@ func _physics_process(delta: float) -> void:
 	move_and_slide()
 
 func _build_bot() -> void:
-	var model_path := "res://assets/kenney/mini-characters/character-male-b.glb"
+	var model_path := "res://assets/codelove/military-male-02.glb"
 	if get_instance_id() % 2 == 0:
-		model_path = "res://assets/kenney/mini-characters/character-male-c.glb"
+		model_path = "res://assets/codelove/military-male-04.glb"
 	var character_scene := load(model_path) as PackedScene
 	if character_scene != null:
 		character_model = character_scene.instantiate() as Node3D
 		if character_model != null:
 			character_model.name = "BotCharacterModel"
-			character_model.scale = Vector3.ONE * 1.25
+			character_model.scale = Vector3.ONE
 			add_child(character_model)
 			model_animation_player = _find_animation_player(character_model)
 			return
