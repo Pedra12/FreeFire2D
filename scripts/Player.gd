@@ -60,5 +60,5 @@ func take_damage(amount: float) -> void:
 	if health <= 0.0:
 		var manager := get_parent().get_node_or_null("MatchManager")
 		if manager and manager.has_method("trigger_defeat"):
-			manager.trigger_defeat()
+			manager.call("trigger_defeat")
 		queue_free()
