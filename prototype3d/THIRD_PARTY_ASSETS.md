@@ -25,8 +25,12 @@ Selected asphalt, grass and concrete Color, NormalGL and Roughness maps. License
 
 ## Firearms and gunshot sound
 Source: https://github.com/petroulacl/fps-asset-kit
-Weapon models: Flat Guns West (assault rifle, full pistol, pump shotgun, full SMG and sniper rifle), originally from OpenGameArt Flat Guns West. Gunshot recordings: game_gunshot.wav and sniper_shot.wav.
+Weapon models: Flat Guns West (assault rifle, full pistol, pump shotgun, full SMG and sniper rifle), originally from OpenGameArt Flat Guns West.
 License: CC0 / public domain as stated by the asset-kit README and upstream sources.
+
+## Gunshot sound effects
+Source: https://sfxmint.com/sounds/impact-gunshot
+Selected CC0 MP3 variants: impact-gunshot-16, impact-gunshot-08, impact-gunshot-09 and impact-gunshot-10. The source library describes its sounds as AI-generated or procedurally synthesized and dedicates them to CC0 1.0.
 
 ## Footstep sound
 Source: Fantozzi's Footsteps, distributed in the FPS Asset Kit at https://github.com/petroulacl/fps-asset-kit.
