@@ -255,6 +255,7 @@ func _load_external_animation_clips() -> void:
 			if not names.is_empty():
 				var copied_animation := source_player.get_animation(names[0]).duplicate(true) as Animation
 				var retargeted_tracks := 0
+				var invalid_tracks: Array[int] = []
 				for track_index in range(copied_animation.get_track_count()):
 					var source_path := String(copied_animation.track_get_path(track_index))
 					var bone_name := source_path.get_slice("/", source_path.get_slice_count("/") - 1)
@@ -262,6 +263,10 @@ func _load_external_animation_clips() -> void:
 						var target_path := "RootNode/" + String(skeleton_relative_path) + ":" + bone_name
 						copied_animation.track_set_path(track_index, NodePath(target_path))
 						retargeted_tracks += 1
+					else:
+						invalid_tracks.append(track_index)
+				for invalid_index in range(invalid_tracks.size() - 1, -1, -1):
+					copied_animation.remove_track(invalid_tracks[invalid_index])
 				if retargeted_tracks > 0:
 					library.add_animation(StringName(state_name), copied_animation)
 					print("Retargeted ", retargeted_tracks, " tracks for ", state_name)
