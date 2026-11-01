@@ -228,12 +228,18 @@ func _build_character() -> void:
 
 
 func _load_external_animation_clips() -> void:
+	var skeletons := character_model.find_children("*", "Skeleton3D", true, false)
+	if skeletons.is_empty():
+		push_warning("Tactical soldier model has no Skeleton3D for animation retargeting")
+		return
+	var target_skeleton := skeletons[0] as Skeleton3D
+	var skeleton_relative_path := character_model.get_path_to(target_skeleton)
+	var library := AnimationLibrary.new()
 	var clip_files := {
 		"idle": "m_idle_neutral_01.glb",
 		"walk": "m_walk_neutral_01.glb",
 		"run": "m_run_neutral_01.glb"
 	}
-	var library := AnimationLibrary.new()
 	for state_name in clip_files:
 		var clip_path := "res://assets/codelove/animations/" + String(clip_files[state_name])
 		var clip_scene := load(clip_path) as PackedScene
@@ -246,16 +252,25 @@ func _load_external_animation_clips() -> void:
 		if source_player != null:
 			var names := source_player.get_animation_list()
 			if not names.is_empty():
-				var source_animation := source_player.get_animation(names[0])
-				var copied_animation := source_animation.duplicate(true) as Animation
-				library.add_animation(StringName(state_name), copied_animation)
+				var copied_animation := source_player.get_animation(names[0]).duplicate(true) as Animation
+				var retargeted_tracks := 0
+				for track_index in range(copied_animation.get_track_count()):
+					var source_path := String(copied_animation.track_get_path(track_index))
+					var bone_name := source_path.get_slice("/", source_path.get_slice_count("/") - 1)
+					if target_skeleton.find_bone(bone_name) >= 0:
+						var target_path := "RootNode/" + String(skeleton_relative_path) + ":" + bone_name
+						copied_animation.track_set_path(track_index, NodePath(target_path))
+						retargeted_tracks += 1
+				if retargeted_tracks > 0:
+					library.add_animation(StringName(state_name), copied_animation)
+					print("Retargeted ", retargeted_tracks, " tracks for ", state_name)
+				else:
+					push_warning("No matching Biped bones found in clip: " + clip_path)
 		else:
 			push_warning("No AnimationPlayer in clip: " + clip_path)
 		clip_root.queue_free()
 	if library.get_animation_list().size() > 0:
 		model_animation_player.add_animation_library("", library)
-		print("Retargeted soldier clips: ", library.get_animation_list())
-
 
 func _create_weapon_visual(index: int) -> void:
 	if is_instance_valid(weapon):
