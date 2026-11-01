@@ -8,6 +8,7 @@ const LOOT_SCRIPT = preload("res://scripts/LootPickup3D.gd")
 var player
 var hud_layer: CanvasLayer
 var health_label: Label
+var health_bar: ProgressBar
 var ammo_label: Label
 var enemies_label: Label
 var status_label: Label
@@ -31,6 +32,8 @@ func _process(delta: float) -> void:
 	if not is_instance_valid(player):
 		return
 	health_label.text = "VIDA  %d / %d" % [roundi(player.health), roundi(player.max_health)]
+	health_bar.max_value = player.max_health
+	health_bar.value = player.health
 	ammo_label.text = "%s  |  MUNIÇÃO  %d / %d" % [player.weapon_name, player.ammo, player.reserve_ammo]
 	enemies_label.text = "INIMIGOS  %d" % get_tree().get_nodes_in_group("bots").size()
 	zone_elapsed += delta
@@ -293,8 +296,25 @@ func _create_hud() -> void:
 	health_label.add_theme_font_size_override("font_size", 19)
 	root.add_child(health_label)
 
+	health_bar = ProgressBar.new()
+	health_bar.position = Vector2(24.0, 84.0)
+	health_bar.size = Vector2(250.0, 14.0)
+	health_bar.min_value = 0.0
+	health_bar.max_value = player.max_health
+	health_bar.value = player.health
+	health_bar.show_percentage = false
+	var health_background := StyleBoxFlat.new()
+	health_background.bg_color = Color(0.04, 0.05, 0.05, 0.88)
+	health_background.set_corner_radius_all(5)
+	var health_fill := StyleBoxFlat.new()
+	health_fill.bg_color = Color(0.16, 0.72, 0.32, 0.98)
+	health_fill.set_corner_radius_all(5)
+	health_bar.add_theme_stylebox_override("background", health_background)
+	health_bar.add_theme_stylebox_override("fill", health_fill)
+	root.add_child(health_bar)
+
 	ammo_label = Label.new()
-	ammo_label.position = Vector2(24.0, 87.0)
+	ammo_label.position = Vector2(24.0, 106.0)
 	ammo_label.size = Vector2(300.0, 30.0)
 	ammo_label.add_theme_font_size_override("font_size", 19)
 	root.add_child(ammo_label)
