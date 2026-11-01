@@ -155,6 +155,14 @@ func _create_map_features() -> void:
 		var z := cos(float(i) * 1.7) * 36.0
 		if Vector2(x, z).length() > 14.0:
 			_create_tree(Vector3(x, 0.0, z))
+	for i in range(18):
+		var angle := float(i) * TAU / 18.0
+		var cover_position := Vector3(cos(angle) * 30.0, 0.0, sin(angle) * 30.0)
+		_spawn_asset(self, "nature-kit/plant-bushlarge.glb", cover_position, 1.1 + float(i % 3) * 0.18, angle)
+	for i in range(14):
+		var angle := float(i) * TAU / 14.0 + 0.3
+		var rock_position := Vector3(cos(angle) * 39.0, 0.0, sin(angle) * 39.0)
+		_spawn_asset(self, "nature-kit/rock-largea.glb", rock_position, 1.0 + float(i % 2) * 0.35, angle)
 	_create_road(Vector3(0.0, 0.015, 0.0), Vector3(5.0, 0.03, 76.0))
 	_create_road(Vector3(0.0, 0.02, 0.0), Vector3(76.0, 0.035, 5.0))
 	_create_vehicle(Vector3(8.0, 0.0, 3.7), 0.25)
