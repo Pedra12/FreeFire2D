@@ -242,6 +242,28 @@ func _create_hud() -> void:
 	fire.button_down.connect(player.shoot)
 	root.add_child(fire)
 
+	var aim_button := Button.new()
+	aim_button.text = "MIRAR"
+	aim_button.position = Vector2(screen.x - 180.0, screen.y - 295.0)
+	aim_button.custom_minimum_size = Vector2(145.0, 56.0)
+	aim_button.size = Vector2(145.0, 56.0)
+	aim_button.add_theme_font_size_override("font_size", 15)
+	aim_button.button_down.connect(func() -> void: player.set_aiming(true))
+	aim_button.button_up.connect(func() -> void: player.set_aiming(false))
+	root.add_child(aim_button)
+
+	var sprint_button := Button.new()
+	sprint_button.text = "CORRER"
+	sprint_button.position = Vector2(38.0, screen.y - 270.0)
+	sprint_button.custom_minimum_size = Vector2(145.0, 52.0)
+	sprint_button.size = Vector2(145.0, 52.0)
+	sprint_button.add_theme_font_size_override("font_size", 15)
+	sprint_button.button_down.connect(func() -> void: Input.action_press("sprint"))
+	sprint_button.button_up.connect(func() -> void: Input.action_release("sprint"))
+	if not InputMap.has_action("sprint"):
+		InputMap.add_action("sprint")
+	root.add_child(sprint_button)
+
 	var reload_button := Button.new()
 	reload_button.text = "RECARREGAR"
 	reload_button.position = Vector2(screen.x - 180.0, screen.y - 225.0)
