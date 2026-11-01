@@ -79,6 +79,8 @@ func _build_bot() -> void:
 		if character_model != null:
 			character_model.name = "RootNode"
 			character_model.scale = Vector3.ONE
+			# Match the imported rig's +Z facing to Godot's -Z character forward.
+			character_model.rotation.y = PI
 			add_child(character_model)
 			model_animation_player = AnimationPlayer.new()
 			model_animation_player.name = "BotAnimationPlayer"
