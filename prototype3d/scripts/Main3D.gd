@@ -13,7 +13,8 @@ var ammo_label: Label
 var enemies_label: Label
 var status_label: Label
 var zone_label: Label
-var zone_ring: MeshInstance3D
+var zone_ring: Node3D
+var zone_segments: Array[MeshInstance3D] = []
 var safe_zone_radius: float = 48.0
 var zone_elapsed: float = 0.0
 var zone_damage_elapsed: float = 0.0
@@ -80,26 +81,30 @@ func _setup_environment() -> void:
 	add_child(sun)
 
 func _create_zone_ring() -> void:
-	zone_ring = MeshInstance3D.new()
+	zone_ring = Node3D.new()
 	zone_ring.name = "SafeZoneBoundary"
 	add_child(zone_ring)
+	var material := StandardMaterial3D.new()
+	material.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	material.albedo_color = Color(0.12, 0.62, 1.0, 0.9)
+	for i in range(64):
+		var segment := MeshInstance3D.new()
+		var mesh := BoxMesh.new()
+		mesh.size = Vector3(0.22, 0.08, 0.9)
+		segment.mesh = mesh
+		segment.material_override = material
+		zone_ring.add_child(segment)
+		zone_segments.append(segment)
 	_update_zone_ring()
 
 func _update_zone_ring() -> void:
 	if not is_instance_valid(zone_ring):
 		return
-	var ring := TorusMesh.new()
-	ring.inner_radius = maxf(0.1, safe_zone_radius - 0.08)
-	ring.outer_radius = safe_zone_radius
-	ring.rings = 64
-	ring.ring_segments = 8
-	zone_ring.mesh = ring
-	zone_ring.position.y = 0.08
-	var material := StandardMaterial3D.new()
-	material.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
-	material.albedo_color = Color(0.12, 0.62, 1.0, 0.9)
-	material.no_depth_test = true
-	zone_ring.material_override = material
+	for i in range(zone_segments.size()):
+		var angle := TAU * float(i) / float(zone_segments.size())
+		var segment := zone_segments[i]
+		segment.position = Vector3(cos(angle) * safe_zone_radius, 0.08, sin(angle) * safe_zone_radius)
+		segment.rotation.y = angle + PI * 0.5
 
 func _create_ground() -> void:
 	var ground := StaticBody3D.new()
