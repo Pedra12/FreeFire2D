@@ -149,6 +149,42 @@ func _create_map_features() -> void:
 	_spawn_asset(self, "city-kit-roads/dumpster.glb", Vector3(19.0, 0.0, -13.0), 1.3)
 	_spawn_asset(self, "city-kit-roads/road-sign-street.glb", Vector3(-7.0, 0.0, 5.0), 1.5)
 
+
+func _create_road(pos: Vector3, road_size: Vector3) -> void:
+	var road := StaticBody3D.new()
+	road.name = "Road"
+	var visual := MeshInstance3D.new()
+	var mesh := BoxMesh.new()
+	mesh.size = road_size
+	visual.mesh = mesh
+	visual.position = pos
+	var asphalt := StandardMaterial3D.new()
+	asphalt.albedo_color = Color(0.105, 0.12, 0.13)
+	asphalt.roughness = 0.98
+	visual.material_override = asphalt
+	road.add_child(visual)
+	var collision := CollisionShape3D.new()
+	var shape := BoxShape3D.new()
+	shape.size = Vector3(road_size.x, maxf(road_size.y, 0.12), road_size.z)
+	collision.shape = shape
+	collision.position = pos
+	road.add_child(collision)
+	var horizontal := road_size.x > road_size.z
+	var dash_count := 14
+	for i in range(dash_count):
+		var marker := MeshInstance3D.new()
+		var marker_mesh := BoxMesh.new()
+		marker_mesh.size = Vector3(0.12, 0.025, 1.65) if horizontal else Vector3(1.65, 0.025, 0.12)
+		marker.mesh = marker_mesh
+		var offset := -road_size.z * 0.5 + (float(i) + 0.5) * road_size.z / float(dash_count) if horizontal else -road_size.x * 0.5 + (float(i) + 0.5) * road_size.x / float(dash_count)
+		marker.position = pos + (Vector3(0.0, 0.03, offset) if horizontal else Vector3(offset, 0.03, 0.0))
+		var paint := StandardMaterial3D.new()
+		paint.albedo_color = Color(0.82, 0.78, 0.58)
+		paint.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+		marker.material_override = paint
+		road.add_child(marker)
+	add_child(road)
+
 func _create_building(pos: Vector3, size: Vector3, color: Color) -> void:
 	var building := StaticBody3D.new()
 	building.position = pos + Vector3(0.0, size.y * 0.5, 0.0)
