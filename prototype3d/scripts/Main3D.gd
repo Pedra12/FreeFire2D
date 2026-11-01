@@ -25,7 +25,7 @@ func _process(_delta: float) -> void:
 	if not is_instance_valid(player):
 		return
 	health_label.text = "VIDA  %d / %d" % [roundi(player.health), roundi(player.max_health)]
-	ammo_label.text = "MUNIÇÃO  %d / %d" % [player.ammo, player.reserve_ammo]
+	ammo_label.text = "%s  |  MUNIÇÃO  %d / %d" % [player.weapon_name, player.ammo, player.reserve_ammo]
 	enemies_label.text = "INIMIGOS  %d" % get_tree().get_nodes_in_group("bots").size()
 	if player.health <= 0.0:
 		status_label.text = "ELIMINADO  |  FIM DE PARTIDA"
@@ -244,6 +244,15 @@ func _create_hud() -> void:
 	fire.button_down.connect(player.set_firing.bind(true))
 	fire.button_up.connect(player.set_firing.bind(false))
 	root.add_child(fire)
+
+	var weapon_button := Button.new()
+	weapon_button.text = "TROCAR ARMA"
+	weapon_button.position = Vector2(screen.x - 180.0, screen.y - 365.0)
+	weapon_button.custom_minimum_size = Vector2(145.0, 56.0)
+	weapon_button.size = Vector2(145.0, 56.0)
+	weapon_button.add_theme_font_size_override("font_size", 15)
+	weapon_button.pressed.connect(player.switch_weapon)
+	root.add_child(weapon_button)
 
 	var aim_button := Button.new()
 	aim_button.text = "MIRAR"
