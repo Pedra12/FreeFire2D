@@ -92,6 +92,13 @@ func _physics_process(delta: float) -> void:
 			velocity.y = 0.0
 	else:
 		velocity.y -= gravity * delta
+	# Battle-royale third-person control: the soldier faces the camera/aim
+	# direction, while movement remains camera-relative (forward, strafe, reverse).
+	# This prevents the body from spinning 180 degrees when the joystick is pushed
+	# forward after the camera has been rotated.
+	rotation.y = lerp_angle(rotation.y, camera_yaw, 16.0 * delta)
+	if is_instance_valid(camera_pivot):
+		camera_pivot.rotation.y = wrapf(camera_yaw - rotation.y, -PI, PI)
 	if direction.length() > 0.08:
 		_play_model_animation("run" if Input.is_action_pressed("sprint") else "walk")
 		footstep_timer -= delta
@@ -99,10 +106,6 @@ func _physics_process(delta: float) -> void:
 			footstep_audio.pitch_scale = randf_range(0.92, 1.08)
 			footstep_audio.play()
 			footstep_timer = 0.38 if Input.is_action_pressed("sprint") else 0.52
-		var target_angle := atan2(-direction.x, -direction.z)
-		rotation.y = lerp_angle(rotation.y, target_angle, 14.0 * delta)
-		if is_instance_valid(camera_pivot):
-			camera_pivot.rotation.y = wrapf(camera_yaw - rotation.y, -PI, PI)
 		walk_clock += delta * 10.0
 		if is_instance_valid(left_leg_pivot):
 			left_leg_pivot.rotation.x = sin(walk_clock) * 0.42
@@ -113,8 +116,6 @@ func _physics_process(delta: float) -> void:
 		if is_instance_valid(left_leg_pivot):
 			left_leg_pivot.rotation.x = move_toward(left_leg_pivot.rotation.x, 0.0, delta * 3.0)
 			right_leg_pivot.rotation.x = move_toward(right_leg_pivot.rotation.x, 0.0, delta * 3.0)
-		if is_instance_valid(camera_pivot):
-			camera_pivot.rotation.y = wrapf(camera_yaw - rotation.y, -PI, PI)
 	fire_cooldown = maxf(0.0, fire_cooldown - delta)
 	recoil_amount = move_toward(recoil_amount, 0.0, delta * 3.5)
 	muzzle_timer = maxf(0.0, muzzle_timer - delta)
