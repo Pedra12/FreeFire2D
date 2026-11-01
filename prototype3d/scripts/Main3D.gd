@@ -128,6 +128,8 @@ func _create_map_features() -> void:
 			_create_tree(Vector3(x, 0.0, z))
 	_create_road(Vector3(0.0, 0.015, 0.0), Vector3(5.0, 0.03, 76.0))
 	_create_road(Vector3(0.0, 0.02, 0.0), Vector3(76.0, 0.035, 5.0))
+	_create_vehicle(Vector3(8.0, 0.0, 3.7), 0.25)
+	_create_vehicle(Vector3(-8.0, 0.0, -3.7), PI)
 
 func _create_building(pos: Vector3, size: Vector3, color: Color) -> void:
 	var building := StaticBody3D.new()
@@ -261,6 +263,62 @@ func _create_road(pos: Vector3, size: Vector3) -> void:
 			stripe.position = pos + Vector3(-size.x * 0.5 + 3.0 + float(i) * 6.0, 0.035, 0.0)
 			stripe.material_override = stripe_material
 			add_child(stripe)
+
+
+func _create_vehicle(pos: Vector3, heading: float) -> void:
+	var vehicle := StaticBody3D.new()
+	vehicle.name = "ParkedVehicle"
+	vehicle.position = pos
+	vehicle.rotation.y = heading
+	var paint := StandardMaterial3D.new()
+	paint.albedo_color = Color(0.16, 0.24, 0.27)
+	paint.metallic = 0.45
+	paint.roughness = 0.38
+	var glass := StandardMaterial3D.new()
+	glass.albedo_color = Color(0.08, 0.16, 0.19, 0.82)
+	glass.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+	var rubber := StandardMaterial3D.new()
+	rubber.albedo_color = Color(0.025, 0.03, 0.03)
+	var chassis := MeshInstance3D.new()
+	var chassis_mesh := BoxMesh.new()
+	chassis_mesh.size = Vector3(2.1, 0.72, 3.6)
+	chassis.mesh = chassis_mesh
+	chassis.position.y = 0.72
+	chassis.material_override = paint
+	vehicle.add_child(chassis)
+	var cabin := MeshInstance3D.new()
+	var cabin_mesh := BoxMesh.new()
+	cabin_mesh.size = Vector3(1.72, 0.82, 1.85)
+	cabin.mesh = cabin_mesh
+	cabin.position = Vector3(0.0, 1.42, 0.05)
+	cabin.material_override = glass
+	vehicle.add_child(cabin)
+	for x in [-0.92, 0.92]:
+		for z in [-1.18, 1.18]:
+			var wheel := MeshInstance3D.new()
+			var wheel_mesh := CylinderMesh.new()
+			wheel_mesh.top_radius = 0.42
+			wheel_mesh.bottom_radius = 0.42
+			wheel_mesh.height = 0.22
+			wheel.mesh = wheel_mesh
+			wheel.rotation.z = PI * 0.5
+			wheel.position = Vector3(x, 0.42, z)
+			wheel.material_override = rubber
+			vehicle.add_child(wheel)
+	var bumper := MeshInstance3D.new()
+	var bumper_mesh := BoxMesh.new()
+	bumper_mesh.size = Vector3(2.18, 0.18, 0.22)
+	bumper.mesh = bumper_mesh
+	bumper.position = Vector3(0.0, 0.48, -1.82)
+	bumper.material_override = rubber
+	vehicle.add_child(bumper)
+	var collision := CollisionShape3D.new()
+	var shape := BoxShape3D.new()
+	shape.size = Vector3(2.15, 1.55, 3.65)
+	collision.shape = shape
+	collision.position.y = 0.82
+	vehicle.add_child(collision)
+	add_child(vehicle)
 
 func _create_player() -> void:
 	player = PLAYER_SCRIPT.new()
