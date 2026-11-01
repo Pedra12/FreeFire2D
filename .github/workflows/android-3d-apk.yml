@@ -58,12 +58,21 @@ jobs:
           echo "GODOT_ANDROID_KEYSTORE_DEBUG_PASSWORD=android" >> "$GITHUB_ENV"
 
       - name: Import and validate 3D project
-        run: godot --headless --editor --path prototype3d --quit
+        shell: bash
+        run: |
+          set -o pipefail
+          godot --headless --editor --path prototype3d --quit 2>&1 | tee /tmp/godot-android-import.log
+          if grep -E "SCRIPT ERROR:|Parse Error:|Compile Error:|Failed to load script" /tmp/godot-android-import.log; then
+            exit 1
+          fi
 
       - name: Export Android APK
         run: |
           mkdir -p prototype3d/build
-          godot --headless --path prototype3d --export-debug "Android" build/FreeFire3D.apk
+          godot --headless --path prototype3d --export-debug "Android" build/FreeFire3D.apk 2>&1 | tee /tmp/godot-android-export.log
+          if grep -E "SCRIPT ERROR:|Parse Error:|Compile Error:|ERROR:" /tmp/godot-android-export.log; then
+            exit 1
+          fi
           test -s prototype3d/build/FreeFire3D.apk
 
       - name: Upload APK
