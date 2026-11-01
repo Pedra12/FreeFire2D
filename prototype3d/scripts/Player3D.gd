@@ -15,6 +15,10 @@ signal stats_changed
 var health: float
 var ammo: int
 var reserve_ammo: int = 120
+var weapon_name: String = "RIFLE"
+var weapon_damage: float = 25.0
+var weapon_fire_interval: float = 0.12
+var weapon_index: int = 0
 var is_reloading: bool = false
 var is_aiming: bool = false
 var is_firing: bool = false
@@ -132,6 +136,7 @@ func _build_camera() -> void:
 	camera_pivot.add_child(spring_arm)
 	camera = Camera3D.new()
 	camera.current = true
+	camera.position = Vector3(0.48, 0.12, 0.0)
 	camera.fov = 75.0
 	spring_arm.add_child(camera)
 	shot_ray = RayCast3D.new()
@@ -146,14 +151,42 @@ func shoot() -> void:
 		if ammo <= 0 and not is_reloading:
 			reload()
 		return
-	fire_cooldown = 0.12
+	fire_cooldown = weapon_fire_interval
 	ammo -= 1
 	if is_instance_valid(shot_ray):
 		shot_ray.force_raycast_update()
 		if shot_ray.is_colliding():
 			var collider: Object = shot_ray.get_collider()
 			if collider != null and collider.has_method("take_damage"):
-				collider.call("take_damage", 25.0)
+				collider.call("take_damage", weapon_damage)
+	stats_changed.emit()
+
+func switch_weapon() -> void:
+	weapon_index = (weapon_index + 1) % 2
+	if weapon_index == 0:
+		weapon_name = "RIFLE"
+		magazine_size = 30
+		weapon_damage = 25.0
+		weapon_fire_interval = 0.12
+		reserve_ammo = 120
+		if is_instance_valid(weapon):
+			var rifle_mesh := BoxMesh.new()
+			rifle_mesh.size = Vector3(0.13, 0.13, 0.85)
+			weapon.mesh = rifle_mesh
+	else:
+		weapon_name = "PISTOLA"
+		magazine_size = 12
+		weapon_damage = 18.0
+		weapon_fire_interval = 0.28
+		reserve_ammo = 48
+		if is_instance_valid(weapon):
+			var pistol_mesh := BoxMesh.new()
+			pistol_mesh.size = Vector3(0.11, 0.12, 0.42)
+			weapon.mesh = pistol_mesh
+	ammo = magazine_size
+	is_reloading = false
+	reload_timer = 0.0
+	fire_cooldown = 0.0
 	stats_changed.emit()
 
 func set_aiming(active: bool) -> void:
