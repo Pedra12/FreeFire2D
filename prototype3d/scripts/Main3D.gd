@@ -23,7 +23,8 @@ func _ready() -> void:
 	_setup_environment()
 	_create_ground()
 	_create_zone_ring()
-	_create_map_features()
+	if not _create_battle_royale_map():
+		_create_map_features()
 	_create_player()
 	_create_bots()
 	_create_loot()
@@ -152,6 +153,31 @@ func _create_ground() -> void:
 	collision.position.y = -0.15
 	ground.add_child(collision)
 	add_child(ground)
+
+
+func _create_battle_royale_map() -> bool:
+	var map_path := "res://assets/battle_royale/town_airfield.glb"
+	var packed := load(map_path) as PackedScene
+	if packed == null:
+		push_warning("Battle Royale map asset unavailable; using fallback map")
+		return false
+	var map_root := packed.instantiate() as Node3D
+	if map_root == null:
+		push_warning("Battle Royale map GLB has no Node3D root")
+		return false
+	map_root.name = "BattleRoyaleTownAndAirfield"
+	add_child(map_root)
+	# Generate static trimesh collision from the imported environment meshes.
+	# This preserves the original art while making buildings and props solid.
+	var mesh_nodes := map_root.find_children("*", "MeshInstance3D", true, false)
+	var collision_count := 0
+	for item in mesh_nodes:
+		var mesh_node := item as MeshInstance3D
+		if mesh_node.mesh != null and mesh_node.mesh.get_surface_count() > 0:
+			mesh_node.create_trimesh_collision()
+			collision_count += 1
+	print("Battle Royale map loaded: ", mesh_nodes.size(), " meshes; collision generated for ", collision_count)
+	return true
 
 func _create_map_features() -> void:
 	_spawn_city_building("building-type-a.glb", Vector3(12, 0, -12), Vector3(10.0, 5.5, 9.0), 0.0)
