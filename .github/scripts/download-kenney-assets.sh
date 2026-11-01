@@ -99,7 +99,8 @@ PY
 
 
 # Godot 4.3 does not support EXT_meshopt_compression / KHR_mesh_quantization.
-# Repack military GLBs as plain glTF-compatible files while keeping rig, names and materials.
+# Repack character, animation and Battle Royale map GLBs as plain glTF-compatible files,
+# preserving skeletons, node names, materials and textures.
 TMP_DIR="$(mktemp -d)"
 git clone --depth 1 https://github.com/zeux/meshoptimizer.git "$TMP_DIR/meshoptimizer"
 cmake -S "$TMP_DIR/meshoptimizer" -B "$TMP_DIR/build" -DMESHOPT_BUILD_GLTFPACK=ON -DCMAKE_BUILD_TYPE=Release
@@ -108,6 +109,6 @@ while IFS= read -r model; do
   converted="${model%.glb}.godot.glb"
   "$TMP_DIR/build/gltfpack" -i "$model" -o "$converted" -noq -kn -km -ke
   mv "$converted" "$model"
-done < <(find prototype3d/assets/codelove -type f -name "*.glb" -print)
+done < <(find prototype3d/assets/codelove prototype3d/assets/battle_royale -type f -name "*.glb" -print)
 rm -rf "$TMP_DIR"
 
