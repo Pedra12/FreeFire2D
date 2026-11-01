@@ -153,10 +153,12 @@ func _build_character() -> void:
 			character_model.scale = Vector3.ONE
 			add_child(character_model)
 			model_animation_player = _find_animation_player(character_model)
-			if model_animation_player != null:
-				print("Imported character animation clips: ", model_animation_player.get_animation_list())
-			else:
-				push_warning("Imported soldier model has no AnimationPlayer")
+			if model_animation_player == null:
+				model_animation_player = AnimationPlayer.new()
+				model_animation_player.name = "SoldierAnimationPlayer"
+				model_animation_player.root_node = NodePath(".")
+				character_model.add_child(model_animation_player)
+			_probe_animation_clip()
 			weapon = _make_box(Vector3(0.13, 0.13, 0.85), Vector3(0.39, 1.08, -0.43), _weapon_material())
 			return
 	var armor := StandardMaterial3D.new()
@@ -215,6 +217,25 @@ func _build_character() -> void:
 	weapon = _make_box(Vector3(0.13, 0.13, 0.85), Vector3(0.39, 1.25, -0.43), metal)
 	_make_box(Vector3(0.15, 0.22, 0.18), Vector3(0.39, 1.08, -0.28), armor)
 
+
+
+func _probe_animation_clip() -> void:
+	var clip_scene := load("res://assets/codelove/animations/m_idle_neutral_01.glb") as PackedScene
+	if clip_scene == null:
+		push_warning("Idle animation clip not imported")
+		return
+	var clip_root := clip_scene.instantiate()
+	add_child(clip_root)
+	var clip_player := _find_animation_player(clip_root)
+	if clip_player == null:
+		print("Animation clip scene has no AnimationPlayer; root=", clip_root.name, " children=", clip_root.get_children())
+	else:
+		print("External clip animations: ", clip_player.get_animation_list())
+		for animation_name in clip_player.get_animation_list():
+			var animation := clip_player.get_animation(animation_name)
+			for track_index in range(mini(animation.get_track_count(), 5)):
+				print("External animation track: ", animation.track_get_path(track_index))
+	clip_root.queue_free()
 
 func _weapon_material() -> Material:
 	var material := StandardMaterial3D.new()
