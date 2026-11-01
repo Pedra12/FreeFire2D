@@ -58,6 +58,22 @@ fetch_pbr Asphalt021_2K-JPG Asphalt021_2K-JPG
 fetch_pbr Grass004_2K-JPG Grass004_2K-JPG
 fetch_pbr Concrete012_2K-JPG Concrete012_2K-JPG
 
+
+# CC0 Battle Royale Town and Airfield: complete preassembled modern combat map.
+# 83 production-ready GLB pieces, including modular buildings, hangar, airfield,
+# loot props, vehicles and environmental dressing. Starter scene is a single GLB.
+mkdir -p prototype3d/assets/battle_royale
+curl -fL --retry 3 --connect-timeout 20 \
+  https://cdn.3dassets.dev/assets/28276/v1/model.glb \
+  -o prototype3d/assets/battle_royale/town_airfield.glb
+python3 - <<'PY'
+from pathlib import Path
+p = Path("prototype3d/assets/battle_royale/town_airfield.glb")
+data = p.read_bytes()
+assert data[:4] == b"glTF" and len(data) > 1_000_000, "Invalid Battle Royale map GLB"
+print(f"Verified Battle Royale map: {len(data):,} bytes")
+PY
+
 # CC0 flat-shaded firearms and real weapon audio from the FPS Asset Kit.
 mkdir -p prototype3d/assets/fps/weapons prototype3d/assets/fps/audio
 FPS_BASE="https://raw.githubusercontent.com/petroulacl/fps-asset-kit/main"
