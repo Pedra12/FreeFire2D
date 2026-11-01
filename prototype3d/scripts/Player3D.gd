@@ -19,11 +19,11 @@ var weapon_name: String = "RIFLE"
 var weapon_damage: float = 25.0
 var weapon_fire_interval: float = 0.12
 var weapon_index: int = 0
-var weapon_magazines: Array[int] = [30, 12, 8, 45]
-var weapon_reserves: Array[int] = [120, 48, 40, 180]
-var weapon_names: Array[String] = ["RIFLE", "PISTOLA", "ESCOPETA", "SMG"]
-var weapon_damages: Array[float] = [25.0, 18.0, 58.0, 13.0]
-var weapon_intervals: Array[float] = [0.12, 0.28, 0.78, 0.075]
+var weapon_magazines: Array[int] = [30, 12, 8, 45, 5]
+var weapon_reserves: Array[int] = [120, 48, 40, 180, 20]
+var weapon_names: Array[String] = ["RIFLE", "PISTOLA", "ESCOPETA", "SMG", "SNIPER"]
+var weapon_damages: Array[float] = [25.0, 18.0, 58.0, 13.0, 95.0]
+var weapon_intervals: Array[float] = [0.12, 0.28, 0.78, 0.075, 1.1]
 var armor_points: float = 75.0
 var backpack_level: int = 2
 var death_state: bool = false
@@ -264,7 +264,8 @@ func _create_weapon_visual(index: int) -> void:
 		"rifle_assault.glb",
 		"pistol_full.glb",
 		"shotgun_pump.glb",
-		"smg_full.glb"
+		"smg_full.glb",
+		"sniper_rifle.glb"
 	]
 	var weapon_path := "res://assets/fps/weapons/" + weapon_files[index % weapon_files.size()]
 	var packed := load(weapon_path) as PackedScene
@@ -436,7 +437,7 @@ func shoot() -> void:
 	if is_instance_valid(muzzle_light):
 		muzzle_light.visible = true
 	if is_instance_valid(shot_audio):
-		shot_audio.pitch_scale = [1.0, 1.25, 0.72, 1.45][weapon_index]
+		shot_audio.pitch_scale = [1.0, 1.25, 0.72, 1.45, 0.55][weapon_index]
 		shot_audio.play()
 	ammo -= 1
 	weapon_magazines[weapon_index] = ammo
@@ -453,7 +454,7 @@ func switch_weapon() -> void:
 	weapon_reserves[weapon_index] = reserve_ammo
 	weapon_index = (weapon_index + 1) % weapon_names.size()
 	weapon_name = weapon_names[weapon_index]
-	magazine_size = [30, 12, 8, 45][weapon_index]
+	magazine_size = [30, 12, 8, 45, 5][weapon_index]
 	weapon_damage = weapon_damages[weapon_index]
 	weapon_fire_interval = weapon_intervals[weapon_index]
 	ammo = weapon_magazines[weapon_index]
