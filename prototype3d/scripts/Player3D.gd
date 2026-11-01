@@ -39,6 +39,7 @@ var camera_pivot: Node3D
 var spring_arm: SpringArm3D
 var camera: Camera3D
 var weapon: Node3D
+var weapon_attachment: BoneAttachment3D
 var shot_ray: RayCast3D
 var shot_audio: AudioStreamPlayer3D
 var footstep_audio: AudioStreamPlayer3D
@@ -273,7 +274,9 @@ func _load_external_animation_clips() -> void:
 		model_animation_player.add_animation_library("", library)
 
 func _create_weapon_visual(index: int) -> void:
-	if is_instance_valid(weapon):
+	if is_instance_valid(weapon_attachment):
+		weapon_attachment.queue_free()
+	elif is_instance_valid(weapon):
 		weapon.queue_free()
 	var weapon_files: Array[String] = [
 		"rifle_assault.glb",
@@ -289,11 +292,21 @@ func _create_weapon_visual(index: int) -> void:
 		if weapon != null:
 			weapon.name = "EquippedFirearm"
 			weapon.scale = Vector3.ONE
-			var right_hand := character_model.find_child("Bip01 R Hand", true, false) as Node3D
-			if right_hand != null:
-				weapon.position = Vector3(0.0, -0.02, -0.10)
-				weapon.rotation = Vector3(0.0, PI, 0.0)
-				right_hand.add_child(weapon)
+			var skeletons := character_model.find_children("*", "Skeleton3D", true, false)
+			if not skeletons.is_empty():
+				var soldier_skeleton := skeletons[0] as Skeleton3D
+				if soldier_skeleton.find_bone("Bip01 R Hand") >= 0:
+					weapon_attachment = BoneAttachment3D.new()
+					weapon_attachment.name = "WeaponAttachment"
+					weapon_attachment.bone_name = "Bip01 R Hand"
+					soldier_skeleton.add_child(weapon_attachment)
+					weapon.position = Vector3(0.0, 0.0, -0.08)
+					weapon.rotation = Vector3(0.0, PI, 0.0)
+					weapon_attachment.add_child(weapon)
+				else:
+					weapon.position = Vector3(0.38, 1.10, -0.48)
+					weapon.rotation = Vector3(0.0, PI, 0.0)
+					add_child(weapon)
 			else:
 				weapon.position = Vector3(0.38, 1.10, -0.48)
 				weapon.rotation = Vector3(0.0, PI, 0.0)
