@@ -42,7 +42,7 @@ fetch_pbr() {
   local dir="prototype3d/assets/pbr/$pack"
   mkdir -p "$dir"
   for map in Color NormalGL Roughness; do
-    curl -fL --retry 3 --connect-timeout 20 "$PBR_BASE/$pack/$prefix-$map.jpg" -o "$dir/$prefix-$map.jpg"
+    curl -fL --retry 3 --connect-timeout 20 "$PBR_BASE/$pack/${prefix}_$map.jpg" -o "$dir/${prefix}_$map.jpg"
   done
 }
 fetch_pbr Asphalt021_2K-JPG Asphalt021_2K-JPG
