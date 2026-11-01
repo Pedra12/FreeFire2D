@@ -35,6 +35,9 @@ var spring_arm: SpringArm3D
 var camera: Camera3D
 var weapon: MeshInstance3D
 var shot_ray: RayCast3D
+var left_leg_pivot: Node3D
+var right_leg_pivot: Node3D
+var walk_clock: float = 0.0
 
 func _ready() -> void:
 	health = max_health
@@ -62,6 +65,14 @@ func _physics_process(delta: float) -> void:
 	if direction.length() > 0.08:
 		var target_angle := atan2(-direction.x, -direction.z)
 		rotation.y = lerp_angle(rotation.y, target_angle, 10.0 * delta)
+		walk_clock += delta * 10.0
+		if is_instance_valid(left_leg_pivot):
+			left_leg_pivot.rotation.x = sin(walk_clock) * 0.42
+			right_leg_pivot.rotation.x = -sin(walk_clock) * 0.42
+	else:
+		if is_instance_valid(left_leg_pivot):
+			left_leg_pivot.rotation.x = move_toward(left_leg_pivot.rotation.x, 0.0, delta * 3.0)
+			right_leg_pivot.rotation.x = move_toward(right_leg_pivot.rotation.x, 0.0, delta * 3.0)
 	fire_cooldown = maxf(0.0, fire_cooldown - delta)
 	if is_reloading:
 		reload_timer -= delta
@@ -98,36 +109,98 @@ func _build_collision() -> void:
 	add_child(collision)
 
 func _build_character() -> void:
-	var body := MeshInstance3D.new()
-	var body_mesh := CapsuleMesh.new()
-	body_mesh.radius = 0.36
-	body_mesh.height = 1.75
-	body.mesh = body_mesh
-	body.position.y = 0.92
-	var body_material := StandardMaterial3D.new()
-	body_material.albedo_color = Color(0.12, 0.28, 0.42)
-	body_material.roughness = 0.82
-	body.material_override = body_material
-	add_child(body)
-	var head := MeshInstance3D.new()
-	var head_mesh := SphereMesh.new()
-	head_mesh.radius = 0.22
-	head_mesh.height = 0.44
-	head.mesh = head_mesh
-	head.position = Vector3(0.0, 1.93, 0.0)
+	var armor := StandardMaterial3D.new()
+	armor.albedo_color = Color(0.12, 0.20, 0.18)
+	armor.roughness = 0.88
+	var vest_material := StandardMaterial3D.new()
+	vest_material.albedo_color = Color(0.30, 0.34, 0.25)
+	vest_material.roughness = 0.95
+	var fabric := StandardMaterial3D.new()
+	fabric.albedo_color = Color(0.18, 0.25, 0.20)
+	fabric.roughness = 1.0
 	var skin := StandardMaterial3D.new()
 	skin.albedo_color = Color(0.72, 0.52, 0.38)
-	head.material_override = skin
-	add_child(head)
-	weapon = MeshInstance3D.new()
-	var gun_mesh := BoxMesh.new()
-	gun_mesh.size = Vector3(0.13, 0.13, 0.85)
-	weapon.mesh = gun_mesh
-	weapon.position = Vector3(0.36, 1.28, -0.32)
-	var gun_material := StandardMaterial3D.new()
-	gun_material.albedo_color = Color(0.09, 0.10, 0.11)
-	weapon.material_override = gun_material
-	add_child(weapon)
+	var metal := StandardMaterial3D.new()
+	metal.albedo_color = Color(0.07, 0.08, 0.075)
+	metal.metallic = 0.35
+	metal.roughness = 0.55
+
+	_make_box(Vector3(0.68, 0.78, 0.36), Vector3(0.0, 1.28, 0.0), armor)
+	_make_box(Vector3(0.72, 0.48, 0.18), Vector3(0.0, 1.34, -0.22), vest_material)
+	for i in range(3):
+		_make_box(Vector3(0.16, 0.17, 0.09), Vector3(-0.23 + float(i) * 0.23, 1.23, -0.34), armor)
+	_make_box(Vector3(0.30, 0.48, 0.25), Vector3(0.0, 1.34, 0.29), fabric)
+	_make_capsule(0.10, 0.18, Vector3(0.0, 1.78, 0.0), skin)
+	_make_sphere(Vector3(0.0, 1.98, 0.0), Vector3(0.22, 0.25, 0.21), skin)
+	var helmet_material := StandardMaterial3D.new()
+	helmet_material.albedo_color = Color(0.20, 0.27, 0.19)
+	helmet_material.roughness = 0.82
+	_make_sphere(Vector3(0.0, 2.14, 0.0), Vector3(0.26, 0.17, 0.25), helmet_material)
+	_make_box(Vector3(0.34, 0.045, 0.24), Vector3(0.0, 2.06, -0.04), metal)
+
+	var left_arm := Node3D.new()
+	left_arm.position = Vector3(-0.42, 1.58, 0.0)
+	add_child(left_arm)
+	_make_capsule_on(left_arm, 0.13, 0.68, Vector3(0.0, -0.30, 0.0), fabric)
+	_make_box_on(left_arm, Vector3(0.19, 0.14, 0.18), Vector3(0.0, -0.65, -0.02), armor)
+	var right_arm := Node3D.new()
+	right_arm.position = Vector3(0.42, 1.58, 0.0)
+	add_child(right_arm)
+	_make_capsule_on(right_arm, 0.13, 0.68, Vector3(0.0, -0.30, -0.04), fabric)
+	_make_box_on(right_arm, Vector3(0.19, 0.14, 0.18), Vector3(0.0, -0.65, -0.08), armor)
+
+	left_leg_pivot = Node3D.new()
+	left_leg_pivot.position = Vector3(-0.20, 0.91, 0.0)
+	add_child(left_leg_pivot)
+	_make_capsule_on(left_leg_pivot, 0.16, 0.78, Vector3(0.0, -0.35, 0.0), fabric)
+	_make_box_on(left_leg_pivot, Vector3(0.30, 0.16, 0.43), Vector3(0.0, -0.72, -0.08), armor)
+	right_leg_pivot = Node3D.new()
+	right_leg_pivot.position = Vector3(0.20, 0.91, 0.0)
+	add_child(right_leg_pivot)
+	_make_capsule_on(right_leg_pivot, 0.16, 0.78, Vector3(0.0, -0.35, 0.0), fabric)
+	_make_box_on(right_leg_pivot, Vector3(0.30, 0.16, 0.43), Vector3(0.0, -0.72, -0.08), armor)
+
+	weapon = _make_box(Vector3(0.13, 0.13, 0.85), Vector3(0.39, 1.25, -0.43), metal)
+	_make_box(Vector3(0.15, 0.22, 0.18), Vector3(0.39, 1.08, -0.28), armor)
+
+func _make_box(size: Vector3, pos: Vector3, material: Material) -> MeshInstance3D:
+	return _make_box_on(self, size, pos, material)
+
+func _make_box_on(parent: Node3D, size: Vector3, pos: Vector3, material: Material) -> MeshInstance3D:
+	var instance := MeshInstance3D.new()
+	var mesh := BoxMesh.new()
+	mesh.size = size
+	instance.mesh = mesh
+	instance.position = pos
+	instance.material_override = material
+	parent.add_child(instance)
+	return instance
+
+func _make_capsule(radius: float, height: float, pos: Vector3, material: Material) -> MeshInstance3D:
+	return _make_capsule_on(self, radius, height, pos, material)
+
+func _make_capsule_on(parent: Node3D, radius: float, height: float, pos: Vector3, material: Material) -> MeshInstance3D:
+	var instance := MeshInstance3D.new()
+	var mesh := CapsuleMesh.new()
+	mesh.radius = radius
+	mesh.height = height
+	instance.mesh = mesh
+	instance.position = pos
+	instance.material_override = material
+	parent.add_child(instance)
+	return instance
+
+func _make_sphere(pos: Vector3, scale_value: Vector3, material: Material) -> MeshInstance3D:
+	var instance := MeshInstance3D.new()
+	var mesh := SphereMesh.new()
+	mesh.radius = 0.5
+	mesh.height = 1.0
+	instance.mesh = mesh
+	instance.position = pos
+	instance.scale = scale_value
+	instance.material_override = material
+	add_child(instance)
+	return instance
 
 func _build_camera() -> void:
 	camera_pivot = Node3D.new()
