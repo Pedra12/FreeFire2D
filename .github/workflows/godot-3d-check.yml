@@ -35,11 +35,14 @@ jobs:
             exit 1
           fi
 
+      - name: Install virtual display for 3D runtime test
+        run: sudo apt-get update && sudo apt-get install -y xvfb libgl1-mesa-dri
+
       - name: Run the 3D scene for 120 frames
         shell: bash
         run: |
           set -o pipefail
-          godot --headless --path prototype3d --quit-after 120 2>&1 | tee /tmp/godot-run.log
+          xvfb-run -a godot --path prototype3d --rendering-method gl_compatibility --quit-after 120 2>&1 | tee /tmp/godot-run.log
           if grep -E "SCRIPT ERROR:|Parse Error:|Compile Error:|ERROR:" /tmp/godot-run.log; then
             exit 1
           fi
