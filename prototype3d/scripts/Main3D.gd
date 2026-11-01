@@ -226,8 +226,7 @@ func _create_road(pos: Vector3, road_size: Vector3) -> void:
 func _create_building(pos: Vector3, size: Vector3, color: Color) -> void:
 	var building := StaticBody3D.new()
 	building.position = pos + Vector3(0.0, size.y * 0.5, 0.0)
-	var wall_pack := "Bricks066_2K-JPG" if color.r > 0.56 else "Concrete012_2K-JPG"
-	var wall_material := _make_pbr_material(wall_pack, color.lightened(0.16), Vector3(2.6, 2.6, 1.0))
+	var wall_material := _make_pbr_material("Concrete012_2K-JPG", color.lightened(0.16), Vector3(2.6, 2.6, 1.0))
 	var inside_material := _make_pbr_material("Concrete012_2K-JPG", color.darkened(0.18), Vector3(2.2, 2.2, 1.0))
 	var wall_height := maxf(2.8, size.y - 0.3)
 	var wall_y := -size.y * 0.5 + wall_height * 0.5
