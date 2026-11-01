@@ -14,9 +14,18 @@ License: CC0 1.0. No attribution required; attribution is included here as a cou
 
 The CI pipeline downloads these files at build time. They are not committed as binary files in this repository.
 
+## Kenney City Kit Suburban
+Source: https://github.com/petroulacl/fps-buildings-env-kit/tree/main/buildings/kenney-city-kit-suburban
+License: CC0 1.0, from the original Kenney asset pack.
+Selected GLB houses, fences, paths, driveway and shared colormap are downloaded by the CI asset script.
+
+## PBR surface textures
+Source: https://ambientcg.com/ (mirrored at https://github.com/petroulacl/fps-buildings-env-kit)
+Selected asphalt, grass and concrete Color, NormalGL and Roughness maps. License: CC0 1.0.
+
 ## Firearms and gunshot sound
 Source: https://github.com/petroulacl/fps-asset-kit
-Weapon models: Flat Guns West (assault rifle, full pistol, pump shotgun, full SMG and sniper rifle), originally from OpenGameArt Flat Guns West.
+Weapon models: Flat Guns West (assault rifle, full pistol, pump shotgun, full SMG and sniper rifle), originally from OpenGameArt Flat Guns West. Gunshot recordings: game_gunshot.wav and sniper_shot.wav.
 License: CC0 / public domain as stated by the asset-kit README and upstream sources.
 
 ## Footstep sound
