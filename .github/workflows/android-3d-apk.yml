@@ -6,6 +6,7 @@ on:
     branches: [main]
     paths:
       - "prototype3d/**"
+      - ".github/scripts/**"
       - ".github/workflows/android-3d-apk.yml"
   push:
     branches: [rebuild-3d]
