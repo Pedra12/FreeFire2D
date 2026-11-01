@@ -18,3 +18,6 @@ Isto ainda é um protótipo de sistemas, não um jogo completo nem uma cópia vi
 
 ## Abrir e exportar
 Importe esta pasta no Godot 4.3 pelo arquivo `project.godot`. O preset Android exporta para ARM64. A compilação Android precisa ser validada no fluxo de CI antes de considerar o APK pronto para instalação.
+
+
+A validação automatizada do projeto 3D é executada separadamente da raiz do repositório para garantir que o Godot importe a pasta correta.
