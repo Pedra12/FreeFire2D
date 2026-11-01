@@ -35,3 +35,9 @@ Selected CC0 MP3 variants: impact-gunshot-16, impact-gunshot-08, impact-gunshot-
 ## Footstep sound
 Source: Fantozzi's Footsteps, distributed in the FPS Asset Kit at https://github.com/petroulacl/fps-asset-kit.
 License: CC0 / public domain as stated by the asset-kit README and upstream source.
+
+
+## Battle Royale Town and Airfield
+Source: https://3dassets.dev/packs/battle-royale-town-and-airfield
+Asset: https://cdn.3dassets.dev/assets/28276/v1/model.glb
+License: CC0 1.0 Universal. The starter scene contains the assembled environment and is downloaded by the CI asset pipeline. The pack includes 83 GLB models, including modular buildings, hangar/airfield pieces, loot props, vehicles and dressing. Its four operator figures are static posed meshes and are not used as animated player characters.
