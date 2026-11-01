@@ -528,11 +528,65 @@ func shoot() -> void:
 	weapon_magazines[weapon_index] = ammo
 	if is_instance_valid(shot_ray):
 		shot_ray.force_raycast_update()
+		var shot_start := camera.global_position - camera.global_basis.z * 0.65
+		var shot_end := camera.global_position - camera.global_basis.z * 70.0
 		if shot_ray.is_colliding():
+			shot_end = shot_ray.get_collision_point()
 			var collider: Object = shot_ray.get_collider()
 			if collider != null and collider.has_method("take_damage"):
 				collider.call("take_damage", weapon_damage)
+			_spawn_impact_spark(shot_end)
+		_spawn_bullet_tracer(shot_start, shot_end)
 	stats_changed.emit()
+
+func _spawn_bullet_tracer(start_point: Vector3, end_point: Vector3) -> void:
+	var distance := start_point.distance_to(end_point)
+	if distance < 0.1:
+		return
+	var tracer := MeshInstance3D.new()
+	tracer.name = "BulletTracer"
+	var beam := BoxMesh.new()
+	beam.size = Vector3(0.018, 0.018, distance)
+	tracer.mesh = beam
+	var glow := StandardMaterial3D.new()
+	glow.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	glow.albedo_color = Color(1.0, 0.72, 0.28, 0.96)
+	glow.emission_enabled = true
+	glow.emission = Color(1.0, 0.42, 0.08)
+	glow.emission_energy_multiplier = 2.4
+	tracer.material_override = glow
+	var scene_root := get_tree().current_scene
+	if scene_root == null:
+		scene_root = get_tree().root
+	scene_root.add_child(tracer)
+	tracer.global_position = (start_point + end_point) * 0.5
+	tracer.look_at(end_point, Vector3.UP)
+	var fade := create_tween()
+	fade.tween_interval(0.065)
+	fade.tween_callback(tracer.queue_free)
+
+func _spawn_impact_spark(point: Vector3) -> void:
+	var spark := MeshInstance3D.new()
+	spark.name = "BulletImpactSpark"
+	var mesh := SphereMesh.new()
+	mesh.radius = 0.055
+	mesh.height = 0.11
+	spark.mesh = mesh
+	var material := StandardMaterial3D.new()
+	material.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	material.albedo_color = Color(1.0, 0.68, 0.24, 1.0)
+	material.emission_enabled = true
+	material.emission = Color(1.0, 0.32, 0.04)
+	material.emission_energy_multiplier = 2.0
+	spark.material_override = material
+	var scene_root := get_tree().current_scene
+	if scene_root == null:
+		scene_root = get_tree().root
+	scene_root.add_child(spark)
+	spark.global_position = point
+	var fade := create_tween()
+	fade.tween_interval(0.12)
+	fade.tween_callback(spark.queue_free)
 
 func switch_weapon() -> void:
 	weapon_magazines[weapon_index] = ammo
