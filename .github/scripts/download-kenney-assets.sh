@@ -67,6 +67,15 @@ curl -fL --retry 3 "$FPS_BASE/weapons/flat_guns_west/Flat%20Guns%20West/GLB/Shot
 curl -fL --retry 3 "$FPS_BASE/weapons/flat_guns_west/Flat%20Guns%20West/GLB/SMG_Full_West.glb" -o prototype3d/assets/fps/weapons/smg_full.glb
 curl -fL --retry 3 "$FPS_BASE/weapons/flat_guns_west/Flat%20Guns%20West/GLB/Sniper_Rifle_West.glb" -o prototype3d/assets/fps/weapons/sniper_rifle.glb
 curl -fL --retry 3 "$FPS_BASE/sfx/footsteps/Fantozzi-footsteps/ogg/Fantozzi-StoneL1.ogg" -o prototype3d/assets/fps/audio/footstep_stone.ogg
+curl -fL --retry 3 "$FPS_BASE/sfx/gunshots/game_gunshot.wav" -o prototype3d/assets/fps/audio/game_gunshot.wav
+curl -fL --retry 3 "$FPS_BASE/sfx/gunshots/sniper_shot.wav" -o prototype3d/assets/fps/audio/sniper_shot.wav
+python3 - <<'PY'
+import wave
+for path in ("prototype3d/assets/fps/audio/game_gunshot.wav", "prototype3d/assets/fps/audio/sniper_shot.wav"):
+    with wave.open(path, "rb") as sound:
+        assert sound.getnframes() > 0 and sound.getframerate() > 0, path
+        print(f"Verified WAV: {path} ({sound.getnframes()} frames at {sound.getframerate()} Hz)")
+PY
 
 
 
