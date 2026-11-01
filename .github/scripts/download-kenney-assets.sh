@@ -43,9 +43,6 @@ fetch_pbr() {
   for map in Color NormalGL Roughness; do
     curl -fL --retry 3 --connect-timeout 20 "$PBR_BASE/$pack/$prefix-$map.jpg" -o "$dir/$prefix-$map.jpg"
   done
-  if [[ "$pack" != "Concrete012_2K-JPG" ]]; then
-    curl -fL --retry 3 --connect-timeout 20 "$PBR_BASE/$pack/$prefix-AmbientOcclusion.jpg" -o "$dir/$prefix-AmbientOcclusion.jpg"
-  fi
 }
 fetch_pbr Asphalt021_2K-JPG Asphalt021_2K-JPG
 fetch_pbr Grass004_2K-JPG Grass004_2K-JPG
