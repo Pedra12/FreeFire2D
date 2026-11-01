@@ -21,10 +21,12 @@ var zone_damage_elapsed: float = 0.0
 
 func _ready() -> void:
 	_setup_environment()
-	_create_ground()
-	_create_zone_ring()
-	if not _create_battle_royale_map():
+	if not _create_complete_map():
+		push_warning("Mapa Free Fire não carregado; usando cenário provisório apenas como contingência")
+		_create_ground()
 		_create_map_features()
+	await get_tree().physics_frame
+	_create_zone_ring()
 	_create_player()
 	_create_bots()
 	_create_loot()
@@ -133,7 +135,10 @@ func _update_zone_ring() -> void:
 	for i in range(zone_segments.size()):
 		var angle := TAU * float(i) / float(zone_segments.size())
 		var segment := zone_segments[i]
-		segment.position = Vector3(cos(angle) * safe_zone_radius, 0.08, sin(angle) * safe_zone_radius)
+		var x := cos(angle) * safe_zone_radius
+		var z := sin(angle) * safe_zone_radius
+		var ground_y := _sample_ground_height(x, z)
+		segment.position = Vector3(x, ground_y + 0.10, z)
 		segment.rotation.y = angle + PI * 0.5
 
 func _create_ground() -> void:
@@ -146,34 +151,46 @@ func _create_ground() -> void:
 	var material := _make_pbr_material("Grass004_2K-JPG", Color(0.78, 0.86, 0.72), Vector3(22.0, 22.0, 1.0))
 	mesh_instance.material_override = material
 	ground.add_child(mesh_instance)
-	var collision := CollisionShape3D.new()
-	var shape := BoxShape3D.new()
-	shape.size = Vector3(MAP_SIZE, 0.3, MAP_SIZE)
-	collision.shape = shape
-	collision.position.y = -0.15
-	ground.add_child(collision)
-	add_child(ground)
-
-
-func _create_battle_royale_map() -> bool:
-	var map_path := "res://assets/battle_royale/town_airfield.glb"
+	var collisionfunc _create_complete_map() -> bool:
+	var map_path := "res://assets/maps/free-fire-complete-map.glb"
 	var packed := load(map_path) as PackedScene
 	if packed == null:
-		push_warning("Battle Royale map asset unavailable; using fallback map")
+		push_error("Não foi possível carregar o mapa convertido: " + map_path)
 		return false
 	var map_root := packed.instantiate() as Node3D
 	if map_root == null:
-		push_warning("Battle Royale map GLB has no Node3D root")
+		push_error("O GLB do mapa não possui uma raiz Node3D")
 		return false
-	map_root.name = "BattleRoyaleTownAndAirfield"
+	map_root.name = "FreeFireCompleteMap"
+	map_root.position = Vector3.ZERO
+	map_root.scale = Vector3.ONE
 	add_child(map_root)
-	# Generate static trimesh collision from the imported environment meshes.
-	# This preserves the original art while making buildings and props solid.
 	var mesh_nodes := map_root.find_children("*", "MeshInstance3D", true, false)
 	var collision_count := 0
 	for item in mesh_nodes:
 		var mesh_node := item as MeshInstance3D
-		if mesh_node.mesh != null and mesh_node.mesh.get_surface_count() > 0:
+		if mesh_node.mesh == null or mesh_node.mesh.get_surface_count() == 0:
+			continue
+		if String(mesh_node.name).to_lower().contains("water"):
+			continue
+		mesh_node.create_trimesh_collision()
+		collision_count += 1
+	print("MAPA FREE FIRE CARREGADO: ", mesh_nodes.size(), " malhas; ", collision_count, " colisões estáticas")
+	return true
+
+func _sample_ground_height(x: float, z: float) -> float:
+	var query := PhysicsRayQueryParameters3D.create(Vector3(x, 60.0, z), Vector3(x, -20.0, z))
+	query.collide_with_areas = false
+	query.collide_with_bodies = true
+	var hit := get_world_3d().direct_space_state.intersect_ray(query)
+	if not hit.is_empty():
+		return float(hit.position.y)
+	return 5.5
+
+func _ground_spawn_position(x: float, z: float) -> Vector3:
+	return Vector3(x, _sample_ground_height(x, z) + 0.18, z)
+
+_surface_count() > 0:
 			mesh_node.create_trimesh_collision()
 			collision_count += 1
 	print("Battle Royale map loaded: ", mesh_nodes.size(), " meshes; collision generated for ", collision_count)
@@ -417,17 +434,17 @@ func _spawn_asset(parent: Node3D, asset_file: String, local_position: Vector3, a
 func _create_player() -> void:
 	player = PLAYER_SCRIPT.new()
 	player.name = "Player"
-	player.position = Vector3(0.0, 0.0, 8.0)
+	player.position = _ground_spawn_position(0.0, 8.0)
 	add_child(player)
 
 func _create_bots() -> void:
 	var spawn_points: Array[Vector3] = [
-		Vector3(-27.0, 0.0, -11.0),
-		Vector3(-25.0, 0.0, 8.0),
-		Vector3(27.0, 0.0, -12.0),
-		Vector3(29.0, 0.0, 11.0),
-		Vector3(0.0, 0.0, -14.0),
-		Vector3(31.0, 0.0, 0.0)
+		_ground_spawn_position(-27.0, -11.0),
+		_ground_spawn_position(-25.0, 8.0),
+		_ground_spawn_position(27.0, -12.0),
+		_ground_spawn_position(29.0, 11.0),
+		_ground_spawn_position(0.0, -24.0),
+		_ground_spawn_position(42.0, 0.0)
 	]
 	for i in range(spawn_points.size()):
 		var bot = BOT_SCRIPT.new()
