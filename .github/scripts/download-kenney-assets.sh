@@ -35,6 +35,15 @@ fetch furniture-kit table.glb
 fetch furniture-kit cardboardboxclosed.glb
 fetch furniture-kit loungesofa.glb
 
+# CC0 Kenney City Kit Suburban building models and props.
+CITY_BASE="https://raw.githubusercontent.com/petroulacl/fps-buildings-env-kit/1dd8e932402deb82422920df2e7fd079391e55d3/buildings/kenney-city-kit-suburban/Models/GLB%20format"
+CITY_OUT="prototype3d/assets/kenney/city-kit-suburban"
+mkdir -p "$CITY_OUT/Textures"
+for model in building-type-a building-type-b building-type-c building-type-d fence-1x3 fence-1x4 planter driveway-long path-stones-messy; do
+  curl -fL --retry 3 --connect-timeout 20 "$CITY_BASE/$model.glb" -o "$CITY_OUT/$model.glb"
+done
+curl -fL --retry 3 --connect-timeout 20 "$CITY_BASE/Textures/colormap.png" -o "$CITY_OUT/Textures/colormap.png"
+
 # CC0 PBR surface maps from ambientCG, mirrored in the FPS Buildings Environment Kit.
 PBR_BASE="https://raw.githubusercontent.com/petroulacl/fps-buildings-env-kit/1dd8e932402deb82422920df2e7fd079391e55d3/environment/ground-textures/ambientcg"
 fetch_pbr() {
