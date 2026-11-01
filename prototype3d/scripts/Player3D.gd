@@ -153,6 +153,10 @@ func _build_character() -> void:
 			character_model.scale = Vector3.ONE
 			add_child(character_model)
 			model_animation_player = _find_animation_player(character_model)
+			if model_animation_player != null:
+				print("Imported character animation clips: ", model_animation_player.get_animation_list())
+			else:
+				push_warning("Imported soldier model has no AnimationPlayer")
 			weapon = _make_box(Vector3(0.13, 0.13, 0.85), Vector3(0.39, 1.08, -0.43), _weapon_material())
 			return
 	var armor := StandardMaterial3D.new()
