@@ -342,6 +342,7 @@ if not InputMap.has_action("jump"):
 	jump_button.add_theme_font_size_override("font_size", 17)
 	jump_button.button_down.connect(func() -> void: Input.action_press("jump"))
 	jump_button.button_up.connect(func() -> void: Input.action_release("jump"))
+	_style_button(jump_button)
 	root.add_child(jump_button)
 
 		var fire := Button.new()
@@ -352,6 +353,7 @@ if not InputMap.has_action("jump"):
 	fire.add_theme_font_size_override("font_size", 22)
 	fire.button_down.connect(player.set_firing.bind(true))
 	fire.button_up.connect(player.set_firing.bind(false))
+	_style_button(fire)
 	root.add_child(fire)
 
 	var weapon_button := Button.new()
@@ -361,6 +363,7 @@ if not InputMap.has_action("jump"):
 	weapon_button.size = Vector2(145.0, 56.0)
 	weapon_button.add_theme_font_size_override("font_size", 15)
 	weapon_button.pressed.connect(player.switch_weapon)
+	_style_button(weapon_button)
 	root.add_child(weapon_button)
 
 	var aim_button := Button.new()
@@ -371,6 +374,7 @@ if not InputMap.has_action("jump"):
 	aim_button.add_theme_font_size_override("font_size", 15)
 	aim_button.button_down.connect(func() -> void: player.set_aiming(true))
 	aim_button.button_up.connect(func() -> void: player.set_aiming(false))
+	_style_button(aim_button)
 	root.add_child(aim_button)
 
 	var sprint_button := Button.new()
@@ -383,6 +387,7 @@ if not InputMap.has_action("jump"):
 	sprint_button.button_up.connect(func() -> void: Input.action_release("sprint"))
 	if not InputMap.has_action("sprint"):
 		InputMap.add_action("sprint")
+	_style_button(sprint_button)
 	root.add_child(sprint_button)
 
 	var reload_button := Button.new()
@@ -392,6 +397,7 @@ if not InputMap.has_action("jump"):
 	reload_button.size = Vector2(145.0, 56.0)
 	reload_button.add_theme_font_size_override("font_size", 15)
 	reload_button.pressed.connect(player.reload)
+	_style_button(reload_button)
 	root.add_child(reload_button)
 
 func _add_hold_button(root: Control, label_text: String, pos: Vector2, action: String) -> void:
@@ -405,4 +411,23 @@ func _add_hold_button(root: Control, label_text: String, pos: Vector2, action: S
 	button.add_theme_font_size_override("font_size", 28)
 	button.button_down.connect(func() -> void: Input.action_press(action))
 	button.button_up.connect(func() -> void: Input.action_release(action))
+	_style_button(button)
 	root.add_child(button)
+
+func _style_button(button: Button) -> void:
+	var normal := StyleBoxFlat.new()
+	normal.bg_color = Color(0.025, 0.045, 0.055, 0.82)
+	normal.border_color = Color(0.58, 0.72, 0.66, 0.92)
+	normal.set_border_width_all(2)
+	normal.set_corner_radius_all(14)
+	normal.content_margin_left = 7.0
+	normal.content_margin_right = 7.0
+	normal.content_margin_top = 5.0
+	normal.content_margin_bottom = 5.0
+	var pressed := normal.duplicate() as StyleBoxFlat
+	pressed.bg_color = Color(0.12, 0.30, 0.25, 0.96)
+	button.add_theme_stylebox_override("normal", normal)
+	button.add_theme_stylebox_override("hover", normal)
+	button.add_theme_stylebox_override("pressed", pressed)
+	button.add_theme_color_override("font_color", Color(0.94, 0.97, 0.93))
+	button.add_theme_color_override("font_pressed_color", Color(1.0, 1.0, 1.0))
