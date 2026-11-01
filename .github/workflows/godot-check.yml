@@ -21,5 +21,11 @@ jobs:
           use-dotnet: false
           include-templates: false
 
-      - name: Import project and validate scripts
+      - name: Import root project
         run: godot --headless --editor --path . --quit
+
+      - name: Import and parse 3D project
+        run: godot --headless --editor --path prototype3d --quit
+
+      - name: Run 3D scene for 120 frames
+        run: godot --headless --path prototype3d --quit-after 120
