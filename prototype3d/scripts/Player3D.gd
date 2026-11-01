@@ -58,10 +58,13 @@ func _physics_process(delta: float) -> void:
 	var target_velocity := direction * current_speed
 	velocity.x = move_toward(velocity.x, target_velocity.x, acceleration * delta)
 	velocity.z = move_toward(velocity.z, target_velocity.z, acceleration * delta)
-	if not is_on_floor():
-		velocity.y -= gravity * delta
+	if is_on_floor():
+		if Input.is_action_just_pressed("jump"):
+			velocity.y = 7.0
+		else:
+			velocity.y = 0.0
 	else:
-		velocity.y = 0.0
+		velocity.y -= gravity * delta
 	if direction.length() > 0.08:
 		var target_angle := atan2(-direction.x, -direction.z)
 		rotation.y = lerp_angle(rotation.y, target_angle, 10.0 * delta)
@@ -87,7 +90,7 @@ func _physics_process(delta: float) -> void:
 func _input(event: InputEvent) -> void:
 	if event is InputEventScreenDrag:
 		var viewport_size := get_viewport().get_visible_rect().size
-		var over_right_hud := event.position.x > viewport_size.x * 0.82 and event.position.y > viewport_size.y * 0.58
+		var over_right_hud := event.position.x > viewport_size.x * 0.75 and event.position.y > viewport_size.y * 0.55
 		if event.position.x > viewport_size.x * 0.42 and not over_right_hud:
 			_rotate_camera(event.relative * touch_sensitivity)
 	elif event is InputEventMouseMotion and Input.is_mouse_button_pressed(MOUSE_BUTTON_RIGHT):
