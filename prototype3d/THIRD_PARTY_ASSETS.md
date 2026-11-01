@@ -17,5 +17,8 @@ The CI pipeline downloads these files at build time. They are not committed as b
 ## Firearms and gunshot sound
 Source: https://github.com/petroulacl/fps-asset-kit
 Weapon models: Flat Guns West (assault rifle, full pistol, pump shotgun, full SMG and sniper rifle), originally from OpenGameArt Flat Guns West.
-Gunshot audio: Free Firearm Sound Library.
 License: CC0 / public domain as stated by the asset-kit README and upstream sources.
+
+## Footstep sound
+Source: Fantozzi's Footsteps, distributed in the FPS Asset Kit at https://github.com/petroulacl/fps-asset-kit.
+License: CC0 / public domain as stated by the asset-kit README and upstream source.
