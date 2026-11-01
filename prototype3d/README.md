@@ -5,7 +5,7 @@ Projeto independente em Godot 4.3, orientado para Android em paisagem e jogabili
 ## Sistemas implementados
 - Personagens militares 3D rigados de 80 ossos e materiais PBR, com animações compatíveis, câmera em terceira pessoa, mira aproximada e controle por toque.
 - Movimento, corrida, salto, recarga, disparo contínuo e poses procedurais de braços e pernas.
-- Quatro classes de arma com modelos GLB próprios: rifle de assalto, pistola, escopeta e submetralhadora, com dano, cadência e reservas independentes.
+- Cinco classes de arma com modelos GLB próprios: rifle de assalto, pistola, escopeta, submetralhadora e rifle de precisão, com dano, cadência e reservas independentes.
 - Colete com absorção de dano, mochila com aumento de reservas, kits médicos e caixas de munição.
 - Bots com perseguição, verificação de linha de visão, disparos, animação simples e queda ao serem eliminados.
 - Zona segura que diminui ao longo da partida e causa dano fora dos limites.
