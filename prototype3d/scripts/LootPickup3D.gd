@@ -1,7 +1,7 @@
 extends Area3D
 class_name LootPickup3D
 
-@export_enum("ammo", "medkit") var loot_type: String = "ammo"
+@export_enum("ammo", "medkit", "armor", "backpack") var loot_type: String = "ammo"
 @export var amount: int = 30
 
 func _ready() -> void:
@@ -14,7 +14,8 @@ func _build_visual() -> void:
 	box.size = Vector3(0.65, 0.42, 0.65)
 	mesh_instance.mesh = box
 	var material := StandardMaterial3D.new()
-	material.albedo_color = Color(0.12, 0.55, 0.82) if loot_type == "ammo" else Color(0.12, 0.72, 0.28)
+	var loot_colors := {"ammo": Color(0.12, 0.55, 0.82), "medkit": Color(0.12, 0.72, 0.28), "armor": Color(0.85, 0.62, 0.12), "backpack": Color(0.58, 0.32, 0.78)}
+	material.albedo_color = loot_colors.get(loot_type, Color.WHITE)
 	material.metallic = 0.15
 	mesh_instance.material_override = material
 	mesh_instance.position.y = 0.35
@@ -32,6 +33,10 @@ func _on_body_entered(body: Node3D) -> void:
 		body.call("add_ammo", amount)
 	elif loot_type == "medkit" and body.has_method("heal"):
 		body.call("heal", float(amount))
+	elif loot_type == "armor" and body.has_method("repair_armor"):
+		body.call("repair_armor", float(amount))
+	elif loot_type == "backpack" and body.has_method("upgrade_backpack"):
+		body.call("upgrade_backpack")
 	else:
 		return
 	queue_free()
