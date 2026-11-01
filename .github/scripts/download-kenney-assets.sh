@@ -42,7 +42,6 @@ curl -fL --retry 3 "$FPS_BASE/weapons/flat_guns_west/Flat%20Guns%20West/GLB/Pist
 curl -fL --retry 3 "$FPS_BASE/weapons/flat_guns_west/Flat%20Guns%20West/GLB/Shotgun_Pump_West.glb" -o prototype3d/assets/fps/weapons/shotgun_pump.glb
 curl -fL --retry 3 "$FPS_BASE/weapons/flat_guns_west/Flat%20Guns%20West/GLB/SMG_Full_West.glb" -o prototype3d/assets/fps/weapons/smg_full.glb
 curl -fL --retry 3 "$FPS_BASE/weapons/flat_guns_west/Flat%20Guns%20West/GLB/Sniper_Rifle_West.glb" -o prototype3d/assets/fps/weapons/sniper_rifle.glb
-curl -fL --retry 3 "$FPS_BASE/sfx/gunshots/game_gunshot.wav" -o prototype3d/assets/fps/audio/game_gunshot.wav
 curl -fL --retry 3 "$FPS_BASE/sfx/footsteps/Fantozzi-footsteps/ogg/Fantozzi-StoneL1.ogg" -o prototype3d/assets/fps/audio/footstep_stone.ogg
 
 
@@ -59,3 +58,4 @@ while IFS= read -r model; do
   mv "$converted" "$model"
 done < <(find prototype3d/assets/codelove -type f -name "*.glb" -print)
 rm -rf "$TMP_DIR"
+
