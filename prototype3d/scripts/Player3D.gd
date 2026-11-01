@@ -19,6 +19,10 @@ var weapon_name: String = "RIFLE"
 var weapon_damage: float = 25.0
 var weapon_fire_interval: float = 0.12
 var weapon_index: int = 0
+var rifle_ammo: int = 30
+var rifle_reserve: int = 120
+var pistol_ammo: int = 12
+var pistol_reserve: int = 48
 var is_reloading: bool = false
 var is_aiming: bool = false
 var is_firing: bool = false
@@ -162,28 +166,34 @@ func shoot() -> void:
 	stats_changed.emit()
 
 func switch_weapon() -> void:
-	weapon_index = (weapon_index + 1) % 2
 	if weapon_index == 0:
-		weapon_name = "RIFLE"
-		magazine_size = 30
-		weapon_damage = 25.0
-		weapon_fire_interval = 0.12
-		reserve_ammo = 120
-		if is_instance_valid(weapon):
-			var rifle_mesh := BoxMesh.new()
-			rifle_mesh.size = Vector3(0.13, 0.13, 0.85)
-			weapon.mesh = rifle_mesh
-	else:
+		rifle_ammo = ammo
+		rifle_reserve = reserve_ammo
+		weapon_index = 1
 		weapon_name = "PISTOLA"
 		magazine_size = 12
 		weapon_damage = 18.0
 		weapon_fire_interval = 0.28
-		reserve_ammo = 48
+		ammo = pistol_ammo
+		reserve_ammo = pistol_reserve
 		if is_instance_valid(weapon):
 			var pistol_mesh := BoxMesh.new()
 			pistol_mesh.size = Vector3(0.11, 0.12, 0.42)
 			weapon.mesh = pistol_mesh
-	ammo = magazine_size
+	else:
+		pistol_ammo = ammo
+		pistol_reserve = reserve_ammo
+		weapon_index = 0
+		weapon_name = "RIFLE"
+		magazine_size = 30
+		weapon_damage = 25.0
+		weapon_fire_interval = 0.12
+		ammo = rifle_ammo
+		reserve_ammo = rifle_reserve
+		if is_instance_valid(weapon):
+			var rifle_mesh := BoxMesh.new()
+			rifle_mesh.size = Vector3(0.13, 0.13, 0.85)
+			weapon.mesh = rifle_mesh
 	is_reloading = false
 	reload_timer = 0.0
 	fire_cooldown = 0.0
