@@ -3,6 +3,7 @@ extends Area2D
 @export var speed: float = 1200.0
 @export var damage: float = 25.0
 var direction: Vector2 = Vector2.ZERO
+var lifetime: float = 2.5
 
 func _ready() -> void:
 	var sprite := Sprite2D.new()
@@ -20,6 +21,9 @@ func _ready() -> void:
 
 func _physics_process(delta: float) -> void:
 	position += direction * speed * delta
+	lifetime -= delta
+	if lifetime <= 0.0:
+		queue_free()
 
 func _on_body_entered(body: Node) -> void:
 	if body.has_method("take_damage"):
