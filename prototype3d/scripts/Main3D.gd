@@ -67,17 +67,32 @@ func _check_mesh_instances() -> void:
 func _setup_environment() -> void:
 	var world := WorldEnvironment.new()
 	var environment := Environment.new()
-	environment.background_mode = Environment.BG_COLOR
-	environment.background_color = Color(0.38, 0.58, 0.72)
-	environment.ambient_light_source = Environment.AMBIENT_SOURCE_COLOR
-	environment.ambient_light_color = Color(0.72, 0.78, 0.82)
-	environment.ambient_light_energy = 0.75
+	var sky := Sky.new()
+	var sky_material := ProceduralSkyMaterial.new()
+	sky_material.sky_top_color = Color(0.075, 0.16, 0.27)
+	sky_material.sky_horizon_color = Color(0.48, 0.61, 0.68)
+	sky_material.ground_bottom_color = Color(0.12, 0.16, 0.13)
+	sky_material.ground_horizon_color = Color(0.48, 0.55, 0.45)
+	sky_material.sun_angle_max = 18.0
+	sky_material.use_debanding = true
+	sky.sky_material = sky_material
+	environment.background_mode = Environment.BG_SKY
+	environment.sky = sky
+	environment.ambient_light_source = Environment.AMBIENT_SOURCE_SKY
+	environment.ambient_light_energy = 0.72
+	environment.tonemap_mode = Environment.TONE_MAPPER_FILMIC
+	environment.fog_enabled = true
+	environment.fog_light_color = Color(0.56, 0.64, 0.66)
+	environment.fog_density = 0.0025
+	environment.fog_sun_scatter = 0.12
 	world.environment = environment
 	add_child(world)
 	var sun := DirectionalLight3D.new()
-	sun.rotation_degrees = Vector3(-48.0, -32.0, 0.0)
-	sun.light_energy = 1.25
+	sun.rotation_degrees = Vector3(-42.0, -28.0, 0.0)
+	sun.light_color = Color(1.0, 0.91, 0.78)
+	sun.light_energy = 1.35
 	sun.shadow_enabled = true
+	sun.directional_shadow_max_distance = 90.0
 	add_child(sun)
 
 func _create_zone_ring() -> void:
