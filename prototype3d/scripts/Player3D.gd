@@ -49,6 +49,9 @@ var left_arm_pivot: Node3D
 var right_arm_pivot: Node3D
 var walk_clock: float = 0.0
 var recoil_amount: float = 0.0
+var character_model: Node3D
+var model_animation_player: AnimationPlayer
+var active_model_animation: StringName = &""
 
 func _ready() -> void:
 	health = max_health
@@ -80,6 +83,7 @@ func _physics_process(delta: float) -> void:
 	else:
 		velocity.y -= gravity * delta
 	if direction.length() > 0.08:
+		_play_model_animation("run" if Input.is_action_pressed("sprint") else "walk")
 		var target_angle := atan2(-direction.x, -direction.z)
 		rotation.y = lerp_angle(rotation.y, target_angle, 10.0 * delta)
 		walk_clock += delta * 10.0
@@ -87,6 +91,7 @@ func _physics_process(delta: float) -> void:
 			left_leg_pivot.rotation.x = sin(walk_clock) * 0.42
 			right_leg_pivot.rotation.x = -sin(walk_clock) * 0.42
 	else:
+		_play_model_animation("idle")
 		if is_instance_valid(left_leg_pivot):
 			left_leg_pivot.rotation.x = move_toward(left_leg_pivot.rotation.x, 0.0, delta * 3.0)
 			right_leg_pivot.rotation.x = move_toward(right_leg_pivot.rotation.x, 0.0, delta * 3.0)
@@ -140,6 +145,16 @@ func _build_collision() -> void:
 	add_child(collision)
 
 func _build_character() -> void:
+	var character_scene := load("res://assets/kenney/mini-characters/character-male-a.glb") as PackedScene
+	if character_scene != null:
+		character_model = character_scene.instantiate() as Node3D
+		if character_model != null:
+			character_model.name = "SoldierCharacterModel"
+			character_model.scale = Vector3.ONE * 1.25
+			add_child(character_model)
+			model_animation_player = _find_animation_player(character_model)
+			weapon = _make_box(Vector3(0.13, 0.13, 0.85), Vector3(0.39, 1.08, -0.43), _weapon_material())
+			return
 	var armor := StandardMaterial3D.new()
 	armor.albedo_color = Color(0.12, 0.20, 0.18)
 	armor.roughness = 0.88
@@ -195,6 +210,41 @@ func _build_character() -> void:
 
 	weapon = _make_box(Vector3(0.13, 0.13, 0.85), Vector3(0.39, 1.25, -0.43), metal)
 	_make_box(Vector3(0.15, 0.22, 0.18), Vector3(0.39, 1.08, -0.28), armor)
+
+
+func _weapon_material() -> Material:
+	var material := StandardMaterial3D.new()
+	material.albedo_color = Color(0.055, 0.065, 0.06)
+	material.metallic = 0.55
+	material.roughness = 0.42
+	return material
+
+func _find_animation_player(root: Node) -> AnimationPlayer:
+	if root is AnimationPlayer:
+		return root as AnimationPlayer
+	for child in root.get_children():
+		var found := _find_animation_player(child)
+		if found != null:
+			return found
+	return null
+
+func _play_model_animation(wanted: String) -> void:
+	if not is_instance_valid(model_animation_player):
+		return
+	var selected: StringName = &""
+	for animation_name in model_animation_player.get_animation_list():
+		var lower := String(animation_name).to_lower()
+		if lower.contains(wanted):
+			selected = StringName(animation_name)
+			break
+	if selected == &"" and wanted == "run":
+		for animation_name in model_animation_player.get_animation_list():
+			if String(animation_name).to_lower().contains("walk"):
+				selected = StringName(animation_name)
+				break
+	if selected != &"" and selected != active_model_animation:
+		active_model_animation = selected
+		model_animation_player.play(selected)
 
 func _make_box(size: Vector3, pos: Vector3, material: Material) -> MeshInstance3D:
 	return _make_box_on(self, size, pos, material)
@@ -295,6 +345,7 @@ func shoot() -> void:
 			reload()
 		return
 	fire_cooldown = weapon_fire_interval
+	_play_model_animation("shoot")
 	recoil_amount = 0.22 if weapon_index == 2 else 0.12
 	muzzle_timer = 0.055
 	if is_instance_valid(muzzle_light):
@@ -343,6 +394,7 @@ func reload() -> void:
 	if is_reloading or ammo >= magazine_size or reserve_ammo <= 0:
 		return
 	is_reloading = true
+	_play_model_animation("reload")
 	reload_timer = reload_duration
 	stats_changed.emit()
 
@@ -386,6 +438,7 @@ func take_damage(amount: float) -> void:
 	stats_changed.emit()
 	if health <= 0.0:
 		death_state = true
+		_play_model_animation("death")
 		is_firing = false
 		is_aiming = false
 		velocity = Vector3.ZERO
