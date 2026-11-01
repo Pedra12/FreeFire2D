@@ -41,6 +41,8 @@ var camera: Camera3D
 var weapon: Node3D
 var shot_ray: RayCast3D
 var shot_audio: AudioStreamPlayer3D
+var footstep_audio: AudioStreamPlayer3D
+var footstep_timer: float = 0.0
 var muzzle_light: OmniLight3D
 var muzzle_timer: float = 0.0
 var left_leg_pivot: Node3D
@@ -84,6 +86,11 @@ func _physics_process(delta: float) -> void:
 		velocity.y -= gravity * delta
 	if direction.length() > 0.08:
 		_play_model_animation("run" if Input.is_action_pressed("sprint") else "walk")
+		footstep_timer -= delta
+		if footstep_timer <= 0.0 and is_on_floor() and is_instance_valid(footstep_audio):
+			footstep_audio.pitch_scale = randf_range(0.92, 1.08)
+			footstep_audio.play()
+			footstep_timer = 0.38 if Input.is_action_pressed("sprint") else 0.52
 		var target_angle := atan2(-direction.x, -direction.z)
 		rotation.y = lerp_angle(rotation.y, target_angle, 10.0 * delta)
 		walk_clock += delta * 10.0
@@ -92,6 +99,7 @@ func _physics_process(delta: float) -> void:
 			right_leg_pivot.rotation.x = -sin(walk_clock) * 0.42
 	else:
 		_play_model_animation("idle")
+		footstep_timer = 0.0
 		if is_instance_valid(left_leg_pivot):
 			left_leg_pivot.rotation.x = move_toward(left_leg_pivot.rotation.x, 0.0, delta * 3.0)
 			right_leg_pivot.rotation.x = move_toward(right_leg_pivot.rotation.x, 0.0, delta * 3.0)
@@ -399,6 +407,13 @@ func _build_audio_and_effects() -> void:
 		sound.data = samples
 		shot_audio.stream = sound
 	add_child(shot_audio)
+
+	footstep_audio = AudioStreamPlayer3D.new()
+	footstep_audio.name = "FootstepAudio"
+	footstep_audio.stream = load("res://assets/fps/audio/footstep_stone.ogg") as AudioStream
+	footstep_audio.volume_db = -15.0
+	footstep_audio.max_distance = 24.0
+	add_child(footstep_audio)
 
 	muzzle_light = OmniLight3D.new()
 	muzzle_light.name = "MuzzleFlash"
