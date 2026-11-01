@@ -14,6 +14,9 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Download CC0 3D asset pack
+        run: bash .github/scripts/download-kenney-assets.sh
+
       - name: Install Godot 4
         uses: chickensoft-games/setup-godot@v1
         with:
