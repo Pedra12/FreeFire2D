@@ -150,7 +150,7 @@ func shoot() -> void:
 		if shot_ray.is_colliding():
 			var collider: Object = shot_ray.get_collider()
 			if collider != null and collider.has_method("take_damage"):
-				collider.take_damage(25.0)
+				collider.call("take_damage", 25.0)
 	stats_changed.emit()
 
 func set_aiming(active: bool) -> void:
