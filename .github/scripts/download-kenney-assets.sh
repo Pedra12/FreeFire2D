@@ -13,10 +13,6 @@ mkdir -p prototype3d/assets/codelove
 curl -fL --retry 3 --connect-timeout 20 https://models.codelove.in/models/military-male-02.glb -o prototype3d/assets/codelove/military-male-02.glb
 curl -fL --retry 3 --connect-timeout 20 https://models.codelove.in/models/military-male-03.glb -o prototype3d/assets/codelove/military-male-03.glb
 curl -fL --retry 3 --connect-timeout 20 https://models.codelove.in/models/military-male-04.glb -o prototype3d/assets/codelove/military-male-04.glb
-fetch mini-characters character-male-a.glb
-fetch mini-characters character-male-b.glb
-fetch mini-characters character-male-c.glb
-fetch mini-characters character-female-a.glb
 fetch car-kit suv.glb
 fetch car-kit police.glb
 fetch car-kit sedan-sports.glb
@@ -33,3 +29,4 @@ fetch furniture-kit desk.glb
 fetch furniture-kit table.glb
 fetch furniture-kit cardboardboxclosed.glb
 fetch furniture-kit loungesofa.glb
+
