@@ -138,7 +138,7 @@ func _physics_process(delta: float) -> void:
 		shoot()
 	move_and_slide()
 
-func _input(event: InputEvent) -> void:
+func _unhandled_input(event: InputEvent) -> void:
 	if event is InputEventScreenDrag:
 		var viewport_size := get_viewport().get_visible_rect().size
 		var over_right_hud: bool = event.position.x > viewport_size.x * 0.75 and event.position.y > viewport_size.y * 0.55
