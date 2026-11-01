@@ -44,6 +44,8 @@ var weapon_base_position: Vector3 = Vector3.ZERO
 var weapon_base_rotation: Vector3 = Vector3.ZERO
 var shot_ray: RayCast3D
 var shot_audio: AudioStreamPlayer3D
+var gunshot_audio_stream: AudioStream
+var sniper_audio_stream: AudioStream
 var footstep_audio: AudioStreamPlayer3D
 var footstep_timer: float = 0.0
 var muzzle_light: OmniLight3D
@@ -475,22 +477,9 @@ func _build_audio_and_effects() -> void:
 	shot_audio.name = "GunshotAudio"
 	shot_audio.volume_db = -7.0
 	shot_audio.max_distance = 65.0
-	var sample_rate := 22050
-	var sample_count := 3308
-	var samples := PackedByteArray()
-	samples.resize(sample_count * 2)
-	for i in range(sample_count):
-		var time := float(i) / float(sample_rate)
-		var envelope := exp(-time * 42.0)
-		var noise := sin(float(i) * 12.9898) * 0.18
-		var wave := (sin(TAU * 105.0 * time) * 0.72 + noise) * envelope
-		samples.encode_s16(i * 2, int(clampf(wave, -1.0, 1.0) * 30000.0))
-	var sound := AudioStreamWAV.new()
-	sound.format = AudioStreamWAV.FORMAT_16_BITS
-	sound.mix_rate = sample_rate
-	sound.stereo = false
-	sound.data = samples
-	shot_audio.stream = sound
+	gunshot_audio_stream = load("res://assets/fps/audio/game_gunshot.wav") as AudioStream
+	sniper_audio_stream = load("res://assets/fps/audio/sniper_shot.wav") as AudioStream
+	shot_audio.stream = gunshot_audio_stream
 	add_child(shot_audio)
 
 	footstep_audio = AudioStreamPlayer3D.new()
@@ -522,7 +511,8 @@ func shoot() -> void:
 	if is_instance_valid(muzzle_light):
 		muzzle_light.visible = true
 	if is_instance_valid(shot_audio):
-		shot_audio.pitch_scale = [1.0, 1.25, 0.72, 1.45, 0.55][weapon_index]
+		shot_audio.stream = sniper_audio_stream if weapon_index == 4 and sniper_audio_stream != null else gunshot_audio_stream
+		shot_audio.pitch_scale = [0.96, 1.12, 0.82, 1.28, 0.92][weapon_index]
 		shot_audio.play()
 	ammo -= 1
 	weapon_magazines[weapon_index] = ammo
