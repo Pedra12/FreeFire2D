@@ -80,17 +80,18 @@ func _create_zone_ring() -> void:
 func _update_zone_ring() -> void:
 	if not is_instance_valid(zone_ring):
 		return
-	var ring := ImmediateMesh.new()
+	var ring := TorusMesh.new()
+	ring.inner_radius = maxf(0.1, safe_zone_radius - 0.08)
+	ring.outer_radius = safe_zone_radius
+	ring.rings = 64
+	ring.ring_segments = 8
+	zone_ring.mesh = ring
+	zone_ring.position.y = 0.08
 	var material := StandardMaterial3D.new()
 	material.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
 	material.albedo_color = Color(0.12, 0.62, 1.0, 0.9)
 	material.no_depth_test = true
-	ring.surface_begin(Mesh.PRIMITIVE_LINE_STRIP, material)
-	for i in range(65):
-		var angle := TAU * float(i) / 64.0
-		ring.surface_add_vertex(Vector3(cos(angle) * safe_zone_radius, 0.08, sin(angle) * safe_zone_radius))
-	ring.surface_end()
-	zone_ring.mesh = ring
+	zone_ring.material_override = material
 
 func _create_ground() -> void:
 	var ground := StaticBody3D.new()
