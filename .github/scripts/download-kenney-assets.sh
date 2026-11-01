@@ -7,7 +7,12 @@ fetch() {
   mkdir -p "$OUT/$pack"
   curl -fL --retry 3 --connect-timeout 20 "$BASE/$pack/$file" -o "$OUT/$pack/$file"
 }
-# Kenney CC0 asset library. Source catalogue: https://github.com/Hidencod/tge-assets
+# Kenney CC0 environment assets: https://github.com/Hidencod/tge-assets
+# CodeLove military characters: MIT, license embedded in each GLB.
+mkdir -p prototype3d/assets/codelove
+curl -fL --retry 3 --connect-timeout 20 https://models.codelove.in/models/military-male-02.glb -o prototype3d/assets/codelove/military-male-02.glb
+curl -fL --retry 3 --connect-timeout 20 https://models.codelove.in/models/military-male-03.glb -o prototype3d/assets/codelove/military-male-03.glb
+curl -fL --retry 3 --connect-timeout 20 https://models.codelove.in/models/military-male-04.glb -o prototype3d/assets/codelove/military-male-04.glb
 fetch mini-characters character-male-a.glb
 fetch mini-characters character-male-b.glb
 fetch mini-characters character-male-c.glb
