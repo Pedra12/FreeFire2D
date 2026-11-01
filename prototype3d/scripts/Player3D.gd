@@ -40,6 +40,8 @@ var spring_arm: SpringArm3D
 var camera: Camera3D
 var weapon: Node3D
 var weapon_attachment: BoneAttachment3D
+var weapon_base_position: Vector3 = Vector3.ZERO
+var weapon_base_rotation: Vector3 = Vector3.ZERO
 var shot_ray: RayCast3D
 var shot_audio: AudioStreamPlayer3D
 var footstep_audio: AudioStreamPlayer3D
@@ -81,6 +83,7 @@ func _physics_process(delta: float) -> void:
 	if is_on_floor():
 		if Input.is_action_just_pressed("jump"):
 			velocity.y = 7.0
+			_animate_weapon_jump()
 		else:
 			velocity.y = 0.0
 	else:
@@ -316,9 +319,50 @@ func _create_weapon_visual(index: int) -> void:
 				weapon.position = Vector3(0.38, 1.10, -0.48)
 				weapon.rotation = Vector3(0.0, PI, 0.0)
 				add_child(weapon)
+			weapon_base_position = weapon.position
+			weapon_base_rotation = weapon.rotation
+			_animate_weapon_aim(is_aiming)
 			return
 	push_warning("Firearm model unavailable, using temporary mesh: " + weapon_path)
 	weapon = _make_box(Vector3(0.13, 0.13, 0.85), Vector3(0.38, 1.10, -0.48), _weapon_material())
+	weapon_base_position = weapon.position
+	weapon_base_rotation = weapon.rotation
+
+
+func _animate_weapon_recoil() -> void:
+	if not is_instance_valid(weapon):
+		return
+	var tween := create_tween()
+	tween.set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_OUT)
+	tween.tween_property(weapon, "position", weapon_base_position + Vector3(0.0, 0.0, 0.12), 0.045)
+	tween.tween_property(weapon, "position", weapon_base_position, 0.10)
+
+func _animate_weapon_aim(active: bool) -> void:
+	if not is_instance_valid(weapon):
+		return
+	var target_rotation := weapon_base_rotation + (Vector3(-0.08, 0.0, 0.0) if active else Vector3.ZERO)
+	var tween := create_tween()
+	tween.set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_OUT)
+	tween.tween_property(weapon, "rotation", target_rotation, 0.16)
+
+func _animate_weapon_reload() -> void:
+	if not is_instance_valid(weapon):
+		return
+	var tween := create_tween()
+	tween.set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
+	tween.tween_property(weapon, "rotation", weapon_base_rotation + Vector3(0.48, 0.0, 0.10), 0.24)
+	tween.parallel().tween_property(weapon, "position", weapon_base_position + Vector3(0.0, -0.10, 0.04), 0.24)
+	tween.tween_interval(0.34)
+	tween.tween_property(weapon, "rotation", weapon_base_rotation, 0.24)
+	tween.parallel().tween_property(weapon, "position", weapon_base_position, 0.24)
+
+func _animate_weapon_jump() -> void:
+	if not is_instance_valid(weapon):
+		return
+	var tween := create_tween()
+	tween.set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_OUT)
+	tween.tween_property(weapon, "position", weapon_base_position + Vector3(0.0, 0.10, -0.04), 0.12)
+	tween.tween_property(weapon, "position", weapon_base_position, 0.24)
 
 func _weapon_material() -> Material:
 	var material := StandardMaterial3D.new()
@@ -461,6 +505,7 @@ func shoot() -> void:
 		return
 	fire_cooldown = weapon_fire_interval
 	_play_model_animation("shoot")
+	_animate_weapon_recoil()
 	recoil_amount = 0.22 if weapon_index == 2 else 0.12
 	muzzle_timer = 0.055
 	if is_instance_valid(muzzle_light):
@@ -496,6 +541,7 @@ func switch_weapon() -> void:
 
 func set_aiming(active: bool) -> void:
 	is_aiming = active
+	_animate_weapon_aim(active)
 
 func set_firing(active: bool) -> void:
 	is_firing = active
@@ -505,6 +551,7 @@ func reload() -> void:
 		return
 	is_reloading = true
 	_play_model_animation("reload")
+	_animate_weapon_reload()
 	reload_timer = reload_duration
 	stats_changed.emit()
 
