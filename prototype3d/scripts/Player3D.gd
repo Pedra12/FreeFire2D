@@ -17,6 +17,7 @@ var ammo: int
 var reserve_ammo: int = 120
 var is_reloading: bool = false
 var is_aiming: bool = false
+var is_firing: bool = false
 var reload_timer: float = 0.0
 var camera_yaw: float = 0.0
 var camera_pitch: float = -0.16
@@ -60,13 +61,15 @@ func _physics_process(delta: float) -> void:
 			_finish_reload()
 	if is_instance_valid(camera):
 		camera.fov = lerpf(camera.fov, 52.0 if is_aiming else 75.0, 10.0 * delta)
+	if is_firing:
+		shoot()
 	move_and_slide()
 
 func _input(event: InputEvent) -> void:
 	if event is InputEventScreenDrag:
 		var viewport_size := get_viewport().get_visible_rect().size
-		var over_fire_button := event.position.x > viewport_size.x * 0.78 and event.position.y > viewport_size.y * 0.70
-		if event.position.x > viewport_size.x * 0.42 and not over_fire_button:
+		var over_right_hud := event.position.x > viewport_size.x * 0.82 and event.position.y > viewport_size.y * 0.58
+		if event.position.x > viewport_size.x * 0.42 and not over_right_hud:
 			_rotate_camera(event.relative * touch_sensitivity)
 	elif event is InputEventMouseMotion and Input.is_mouse_button_pressed(MOUSE_BUTTON_RIGHT):
 		_rotate_camera(event.relative * mouse_sensitivity)
@@ -155,6 +158,9 @@ func shoot() -> void:
 
 func set_aiming(active: bool) -> void:
 	is_aiming = active
+
+func set_firing(active: bool) -> void:
+	is_firing = active
 
 func reload() -> void:
 	if is_reloading or ammo >= magazine_size or reserve_ammo <= 0:
