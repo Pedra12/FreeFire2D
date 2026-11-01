@@ -16,6 +16,7 @@ var health: float
 var ammo: int
 var reserve_ammo: int = 120
 var is_reloading: bool = false
+var is_aiming: bool = false
 var reload_timer: float = 0.0
 var camera_yaw: float = 0.0
 var camera_pitch: float = -0.16
@@ -41,7 +42,8 @@ func _physics_process(delta: float) -> void:
 	var direction := basis_yaw * Vector3(input_vector.x, 0.0, input_vector.y)
 	direction.y = 0.0
 	direction = direction.normalized()
-	var target_velocity := direction * move_speed
+	var current_speed := move_speed * (1.45 if Input.is_action_pressed("sprint") else 1.0)
+	var target_velocity := direction * current_speed
 	velocity.x = move_toward(velocity.x, target_velocity.x, acceleration * delta)
 	velocity.z = move_toward(velocity.z, target_velocity.z, acceleration * delta)
 	if not is_on_floor():
@@ -56,6 +58,8 @@ func _physics_process(delta: float) -> void:
 		reload_timer -= delta
 		if reload_timer <= 0.0:
 			_finish_reload()
+	if is_instance_valid(camera):
+		camera.fov = lerpf(camera.fov, 52.0 if is_aiming else 75.0, 10.0 * delta)
 	move_and_slide()
 
 func _input(event: InputEvent) -> void:
@@ -132,6 +136,7 @@ func _build_camera() -> void:
 	shot_ray.collision_mask = 1
 	shot_ray.enabled = true
 	camera.add_child(shot_ray)
+	shot_ray.add_exception(self)
 
 func shoot() -> void:
 	if fire_cooldown > 0.0 or is_reloading or ammo <= 0:
@@ -147,6 +152,9 @@ func shoot() -> void:
 			if collider != null and collider.has_method("take_damage"):
 				collider.take_damage(25.0)
 	stats_changed.emit()
+
+func set_aiming(active: bool) -> void:
+	is_aiming = active
 
 func reload() -> void:
 	if is_reloading or ammo >= magazine_size or reserve_ammo <= 0:
