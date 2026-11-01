@@ -159,10 +159,10 @@ func _create_ground() -> void:
 	add_child(ground)
 
 func _create_map_features() -> void:
-	_create_building(Vector3(12, 0, -12), Vector3(10, 5, 9), Color(0.62, 0.52, 0.38))
-	_create_building(Vector3(-15, 0, -8), Vector3(8, 4, 8), Color(0.68, 0.62, 0.48))
-	_create_building(Vector3(16, 0, 15), Vector3(12, 6, 10), Color(0.52, 0.55, 0.58))
-	_create_building(Vector3(-18, 0, 17), Vector3(9, 4.5, 11), Color(0.60, 0.43, 0.34))
+	_spawn_city_building("building-type-a.glb", Vector3(12, 0, -12), Vector3(10.0, 5.5, 9.0), 0.0)
+	_spawn_city_building("building-type-b.glb", Vector3(-15, 0, -8), Vector3(8.5, 5.0, 8.5), PI * 0.5)
+	_spawn_city_building("building-type-c.glb", Vector3(16, 0, 15), Vector3(11.0, 6.0, 10.0), PI)
+	_spawn_city_building("building-type-d.glb", Vector3(-18, 0, 17), Vector3(9.5, 5.5, 10.5), -PI * 0.5)
 	_create_building(Vector3(31, 0, -13), Vector3(7, 4, 8), Color(0.58, 0.48, 0.37))
 	_create_building(Vector3(-32, 0, -29), Vector3(8, 4.5, 9), Color(0.48, 0.53, 0.50))
 	_create_building(Vector3(31, 0, 30), Vector3(8, 3.8, 8), Color(0.62, 0.56, 0.43))
@@ -188,7 +188,25 @@ func _create_map_features() -> void:
 	_spawn_asset(self, "city-kit-roads/light-curved.glb", Vector3(-4.0, 0.0, 10.0), 1.8, PI)
 	_spawn_asset(self, "city-kit-roads/dumpster.glb", Vector3(19.0, 0.0, -13.0), 1.3)
 	_spawn_asset(self, "city-kit-roads/road-sign-street.glb", Vector3(-7.0, 0.0, 5.0), 1.5)
+	_spawn_asset(self, "city-kit-suburban/driveway-long.glb", Vector3(12.0, 0.01, -5.8), 1.0, 0.0)
+	_spawn_asset(self, "city-kit-suburban/path-stones-messy.glb", Vector3(-15.0, 0.02, -1.0), 1.5, 0.4)
+	_spawn_asset(self, "city-kit-suburban/fence-1x3.glb", Vector3(6.0, 0.0, -19.0), 1.0, 0.0)
+	_spawn_asset(self, "city-kit-suburban/fence-1x4.glb", Vector3(19.0, 0.0, -19.0), 1.0, 0.0)
+	_spawn_asset(self, "city-kit-suburban/planter.glb", Vector3(22.0, 0.0, 10.0), 1.0, PI * 0.5)
 
+
+func _spawn_city_building(model_file: String, pos: Vector3, collision_size: Vector3, yaw: float) -> void:
+	var body := StaticBody3D.new()
+	body.name = "CityBuilding_" + model_file.trim_suffix(".glb")
+	body.position = pos
+	_spawn_asset(body, "city-kit-suburban/" + model_file, Vector3.ZERO, 1.0, yaw)
+	var collision := CollisionShape3D.new()
+	var shape := BoxShape3D.new()
+	shape.size = collision_size
+	collision.shape = shape
+	collision.position.y = collision_size.y * 0.5
+	body.add_child(collision)
+	add_child(body)
 
 func _create_road(pos: Vector3, road_size: Vector3) -> void:
 	var road := StaticBody3D.new()
