@@ -30,3 +30,16 @@ fetch furniture-kit table.glb
 fetch furniture-kit cardboardboxclosed.glb
 fetch furniture-kit loungesofa.glb
 
+
+# Godot 4.3 does not support EXT_meshopt_compression / KHR_mesh_quantization.
+# Repack military GLBs as plain glTF-compatible files while keeping rig, names and materials.
+TMP_DIR="$(mktemp -d)"
+git clone --depth 1 https://github.com/zeux/meshoptimizer.git "$TMP_DIR/meshoptimizer"
+cmake -S "$TMP_DIR/meshoptimizer" -B "$TMP_DIR/build" -DMESHOPT_BUILD_GLTFPACK=ON -DCMAKE_BUILD_TYPE=Release
+cmake --build "$TMP_DIR/build" --target gltfpack --parallel 2
+for model in prototype3d/assets/codelove/*.glb; do
+  converted="${model%.glb}.godot.glb"
+  "$TMP_DIR/build/gltfpack" -i "$model" -o "$converted" -noq -kn -km -ke
+  mv "$converted" "$model"
+done
+rm -rf "$TMP_DIR"
