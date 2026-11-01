@@ -16,6 +16,9 @@ var right_leg_pivot: Node3D
 var right_arm_pivot: Node3D
 var dead: bool = false
 var walk_clock: float = 0.0
+var character_model: Node3D
+var model_animation_player: AnimationPlayer
+var active_model_animation: StringName = &""
 
 func _ready() -> void:
 	health = max_health
@@ -39,6 +42,7 @@ func _physics_process(delta: float) -> void:
 		velocity.z = move_toward(velocity.z, 0.0, 8.0 * delta)
 		_reset_legs(delta)
 	elif distance > attack_range:
+		_play_model_animation("run")
 		var direction := offset.normalized()
 		walk_clock += delta * 8.0
 		if is_instance_valid(left_leg_pivot):
@@ -48,6 +52,7 @@ func _physics_process(delta: float) -> void:
 		velocity.z = direction.z * move_speed
 		rotation.y = lerp_angle(rotation.y, atan2(-direction.x, -direction.z), 7.0 * delta)
 	else:
+		_play_model_animation("idle")
 		velocity.x = move_toward(velocity.x, 0.0, 12.0 * delta)
 		velocity.z = move_toward(velocity.z, 0.0, 12.0 * delta)
 		_reset_legs(delta)
@@ -65,6 +70,18 @@ func _physics_process(delta: float) -> void:
 	move_and_slide()
 
 func _build_bot() -> void:
+	var model_path := "res://assets/kenney/mini-characters/character-male-b.glb"
+	if get_instance_id() % 2 == 0:
+		model_path = "res://assets/kenney/mini-characters/character-male-c.glb"
+	var character_scene := load(model_path) as PackedScene
+	if character_scene != null:
+		character_model = character_scene.instantiate() as Node3D
+		if character_model != null:
+			character_model.name = "BotCharacterModel"
+			character_model.scale = Vector3.ONE * 1.25
+			add_child(character_model)
+			model_animation_player = _find_animation_player(character_model)
+			return
 	var armor := StandardMaterial3D.new()
 	armor.albedo_color = Color(0.25, 0.09, 0.08)
 	armor.roughness = 0.9
@@ -116,6 +133,33 @@ func _build_bot() -> void:
 	_make_box_on(right_leg_pivot, Vector3(0.30, 0.16, 0.43), Vector3(0.0, -0.72, -0.08), armor)
 	_make_box(Vector3(0.13, 0.13, 0.72), Vector3(0.39, 1.25, -0.40), metal)
 
+
+func _find_animation_player(root: Node) -> AnimationPlayer:
+	if root is AnimationPlayer:
+		return root as AnimationPlayer
+	for child in root.get_children():
+		var found := _find_animation_player(child)
+		if found != null:
+			return found
+	return null
+
+func _play_model_animation(wanted: String) -> void:
+	if not is_instance_valid(model_animation_player):
+		return
+	var selected: StringName = &""
+	for animation_name in model_animation_player.get_animation_list():
+		if String(animation_name).to_lower().contains(wanted):
+			selected = StringName(animation_name)
+			break
+	if selected == &"" and wanted == "run":
+		for animation_name in model_animation_player.get_animation_list():
+			if String(animation_name).to_lower().contains("walk"):
+				selected = StringName(animation_name)
+				break
+	if selected != &"" and selected != active_model_animation:
+		active_model_animation = selected
+		model_animation_player.play(selected)
+
 func _make_box(size: Vector3, pos: Vector3, material: Material) -> MeshInstance3D:
 	return _make_box_on(self, size, pos, material)
 
@@ -161,6 +205,7 @@ func _reset_legs(delta: float) -> void:
 		right_leg_pivot.rotation.x = move_toward(right_leg_pivot.rotation.x, 0.0, delta * 3.0)
 
 func _fire_at_target() -> void:
+	_play_model_animation("shoot")
 	if not is_instance_valid(target) or not target.has_method("take_damage"):
 		return
 	var from := global_position + Vector3(0.0, 1.35, 0.0)
@@ -177,6 +222,7 @@ func take_damage(amount: float) -> void:
 	health = maxf(0.0, health - amount)
 	if health <= 0.0:
 		dead = true
+		_play_model_animation("death")
 		velocity = Vector3.ZERO
 		set_physics_process(false)
 		var tween := create_tween()
