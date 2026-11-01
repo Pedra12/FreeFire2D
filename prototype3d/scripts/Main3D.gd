@@ -1,7 +1,8 @@
 extends Node3D
 
 const MAP_SIZE: float = 100.0
-var player: Player3D
+const PLAYER_SCRIPT = preload("res://scripts/Player3D.gd")
+var player
 var hud_layer: CanvasLayer
 
 func _ready() -> void:
@@ -132,7 +133,7 @@ func _create_road(pos: Vector3, size: Vector3) -> void:
 	add_child(road)
 
 func _create_player() -> void:
-	player = Player3D.new()
+	player = PLAYER_SCRIPT.new()
 	player.name = "Player"
 	player.position = Vector3(0.0, 0.0, 8.0)
 	add_child(player)
