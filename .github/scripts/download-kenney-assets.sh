@@ -34,6 +34,21 @@ fetch furniture-kit table.glb
 fetch furniture-kit cardboardboxclosed.glb
 fetch furniture-kit loungesofa.glb
 
+# CC0 PBR surface maps from ambientCG, mirrored in the FPS Buildings Environment Kit.
+PBR_BASE="https://raw.githubusercontent.com/petroulacl/fps-buildings-env-kit/1dd8e932402deb82422920df2e7fd079391e55d3/environment/ground-textures/ambientcg"
+fetch_pbr() {
+  local pack="$1" prefix="$2"
+  local dir="prototype3d/assets/pbr/$pack"
+  mkdir -p "$dir"
+  for map in Color NormalGL Roughness AmbientOcclusion; do
+    curl -fL --retry 3 --connect-timeout 20 "$PBR_BASE/$pack/$prefix-$map.jpg" -o "$dir/$prefix-$map.jpg"
+  done
+}
+fetch_pbr Asphalt021_2K-JPG Asphalt021_2K-JPG
+fetch_pbr Grass004_2K-JPG Grass004_2K-JPG
+fetch_pbr Concrete012_2K-JPG Concrete012_2K-JPG
+fetch_pbr Bricks066_2K-JPG Bricks066_2K-JPG
+
 # CC0 flat-shaded firearms and real weapon audio from the FPS Asset Kit.
 mkdir -p prototype3d/assets/fps/weapons prototype3d/assets/fps/audio
 FPS_BASE="https://raw.githubusercontent.com/petroulacl/fps-asset-kit/main"
