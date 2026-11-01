@@ -240,6 +240,44 @@ func _create_building(pos: Vector3, size: Vector3, color: Color) -> void:
 	_spawn_asset(building, "furniture-kit/chair.glb", Vector3(size.x * 0.20, -size.y * 0.5 + 0.05, -size.z * 0.10), 0.9)
 	_spawn_asset(building, "furniture-kit/desk.glb", Vector3(size.x * 0.20, -size.y * 0.5 + 0.05, -size.z * 0.28), 0.85)
 	_spawn_asset(building, "furniture-kit/cardboardboxclosed.glb", Vector3(-size.x * 0.25, -size.y * 0.5 + 0.1, -size.z * 0.25), 0.8)
+
+	# Second storey: half-floor, a walkable ramp and visible stair treads.
+	var upper_floor_y := -size.y * 0.5 + wall_height * 0.58
+	var upper_floor_size := Vector3(size.x - 0.4, 0.18, size.z * 0.48)
+	var upper_floor_pos := Vector3(0.0, upper_floor_y, size.z * 0.25)
+	_building_piece(building, upper_floor_size, upper_floor_pos, inside_material)
+	var ramp_height := upper_floor_y + size.y * 0.5
+	var ramp_run := size.z * 0.56
+	var ramp_angle := atan2(ramp_height, ramp_run)
+	var ramp_pos := Vector3(-size.x * 0.28, -size.y * 0.5 + ramp_height * 0.5, -size.z * 0.38 + ramp_run * 0.5)
+	var ramp_mesh := MeshInstance3D.new()
+	var ramp_box := BoxMesh.new()
+	ramp_box.size = Vector3(1.45, 0.16, ramp_run)
+	ramp_mesh.mesh = ramp_box
+	ramp_mesh.position = ramp_pos
+	ramp_mesh.rotation.x = -ramp_angle
+	var stair_material := StandardMaterial3D.new()
+	stair_material.albedo_color = Color(0.27, 0.20, 0.13)
+	stair_material.roughness = 0.94
+	ramp_mesh.material_override = stair_material
+	building.add_child(ramp_mesh)
+	var ramp_collision := CollisionShape3D.new()
+	var ramp_shape := BoxShape3D.new()
+	ramp_shape.size = ramp_box.size
+	ramp_collision.shape = ramp_shape
+	ramp_collision.position = ramp_pos
+	ramp_collision.rotation.x = -ramp_angle
+	building.add_child(ramp_collision)
+	for step_index in range(8):
+		var step := MeshInstance3D.new()
+		var step_mesh := BoxMesh.new()
+		step_mesh.size = Vector3(1.48, 0.16, ramp_run / 8.0 + 0.04)
+		step.mesh = step_mesh
+		step.position = Vector3(ramp_pos.x, -size.y * 0.5 + (float(step_index) + 0.5) * ramp_height / 8.0 + 0.12, -size.z * 0.38 + (float(step_index) + 0.5) * ramp_run / 8.0)
+		step.material_override = stair_material
+		building.add_child(step)
+	_spawn_asset(building, "furniture-kit/loungesofa.glb", Vector3(size.x * 0.18, upper_floor_y + 0.12, size.z * 0.30), 0.78)
+	_spawn_asset(building, "furniture-kit/table.glb", Vector3(-size.x * 0.08, upper_floor_y + 0.12, size.z * 0.34), 0.78)
 	add_child(building)
 
 func _building_piece(parent: StaticBody3D, piece_size: Vector3, piece_position: Vector3, material: Material) -> void:
