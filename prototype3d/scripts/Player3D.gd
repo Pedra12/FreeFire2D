@@ -528,7 +528,6 @@ func shoot() -> void:
 	weapon_magazines[weapon_index] = ammo
 	if is_instance_valid(shot_ray):
 		shot_ray.force_raycast_update()
-		var shot_start := camera.global_position - camera.global_basis.z * 0.65
 		var shot_end := camera.global_position - camera.global_basis.z * 70.0
 		if shot_ray.is_colliding():
 			shot_end = shot_ray.get_collision_point()
@@ -536,6 +535,10 @@ func shoot() -> void:
 			if collider != null and collider.has_method("take_damage"):
 				collider.call("take_damage", weapon_damage)
 			_spawn_impact_spark(shot_end)
+		var shot_start := weapon.global_position if is_instance_valid(weapon) else camera.global_position
+		shot_start += (shot_end - shot_start).normalized() * 0.38
+		if is_instance_valid(muzzle_light):
+			muzzle_light.global_position = shot_start
 		_spawn_bullet_tracer(shot_start, shot_end)
 	stats_changed.emit()
 
