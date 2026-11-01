@@ -98,7 +98,7 @@ func _fire_at_target() -> void:
 	query.exclude = [get_rid()]
 	var hit := get_world_3d().direct_space_state.intersect_ray(query)
 	if not hit.is_empty() and hit.get("collider") == target:
-		target.take_damage(damage)
+		target.call("take_damage", damage)
 
 func take_damage(amount: float) -> void:
 	health = maxf(0.0, health - amount)
