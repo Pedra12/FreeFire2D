@@ -145,12 +145,12 @@ func _build_collision() -> void:
 	add_child(collision)
 
 func _build_character() -> void:
-	var character_scene := load("res://assets/kenney/mini-characters/character-male-a.glb") as PackedScene
+	var character_scene := load("res://assets/codelove/military-male-03.glb") as PackedScene
 	if character_scene != null:
 		character_model = character_scene.instantiate() as Node3D
 		if character_model != null:
 			character_model.name = "SoldierCharacterModel"
-			character_model.scale = Vector3.ONE * 1.25
+			character_model.scale = Vector3.ONE
 			add_child(character_model)
 			model_animation_player = _find_animation_player(character_model)
 			weapon = _make_box(Vector3(0.13, 0.13, 0.85), Vector3(0.39, 1.08, -0.43), _weapon_material())
