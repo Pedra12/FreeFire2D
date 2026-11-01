@@ -86,6 +86,7 @@ func _build_bot() -> void:
 			add_child(model_animation_player)
 			_load_external_animation_clips()
 			_play_model_animation("idle")
+			_attach_bot_weapon()
 			return
 	var armor := StandardMaterial3D.new()
 	armor.albedo_color = Color(0.25, 0.09, 0.08)
@@ -139,6 +140,26 @@ func _build_bot() -> void:
 	_make_box(Vector3(0.13, 0.13, 0.72), Vector3(0.39, 1.25, -0.40), metal)
 
 
+
+
+func _attach_bot_weapon() -> void:
+	var packed := load("res://assets/fps/weapons/rifle_assault.glb") as PackedScene
+	if packed == null:
+		return
+	var firearm := packed.instantiate() as Node3D
+	if firearm == null:
+		return
+	firearm.name = "BotAssaultRifle"
+	firearm.scale = Vector3.ONE
+	var hand := character_model.find_child("Bip01 R Hand", true, false) as Node3D
+	if hand != null:
+		firearm.position = Vector3(0.0, -0.02, -0.10)
+		firearm.rotation = Vector3(0.0, PI, 0.0)
+		hand.add_child(firearm)
+	else:
+		firearm.position = Vector3(0.38, 1.10, -0.48)
+		firearm.rotation = Vector3(0.0, PI, 0.0)
+		add_child(firearm)
 
 func _load_external_animation_clips() -> void:
 	var clip_files := {
