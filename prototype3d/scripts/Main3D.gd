@@ -95,6 +95,23 @@ func _setup_environment() -> void:
 	sun.directional_shadow_max_distance = 90.0
 	add_child(sun)
 
+func _make_pbr_material(pack_name: String, tint: Color, uv_scale: Vector3) -> StandardMaterial3D:
+	var folder := "res://assets/pbr/" + pack_name + "/" + pack_name + "_"
+	var material := StandardMaterial3D.new()
+	material.albedo_color = tint
+	material.albedo_texture = load(folder + "Color.jpg") as Texture2D
+	material.normal_enabled = true
+	material.normal_texture = load(folder + "NormalGL.jpg") as Texture2D
+	material.normal_scale = 0.72
+	material.roughness_texture = load(folder + "Roughness.jpg") as Texture2D
+	material.roughness_texture_channel = BaseMaterial3D.TEXTURE_CHANNEL_ALPHA
+	material.ao_enabled = true
+	material.ao_texture = load(folder + "AmbientOcclusion.jpg") as Texture2D
+	material.ao_texture_channel = BaseMaterial3D.TEXTURE_CHANNEL_ALPHA
+	material.roughness = 0.88
+	material.uv1_scale = uv_scale
+	return material
+
 func _create_zone_ring() -> void:
 	zone_ring = Node3D.new()
 	zone_ring.name = "SafeZoneBoundary"
@@ -128,9 +145,7 @@ func _create_ground() -> void:
 	var mesh := PlaneMesh.new()
 	mesh.size = Vector2(MAP_SIZE, MAP_SIZE)
 	mesh_instance.mesh = mesh
-	var material := StandardMaterial3D.new()
-	material.albedo_color = Color(0.25, 0.39, 0.22)
-	material.roughness = 1.0
+	var material := _make_pbr_material("Grass004_2K-JPG", Color(0.78, 0.86, 0.72), Vector3(22.0, 22.0, 1.0))
 	mesh_instance.material_override = material
 	ground.add_child(mesh_instance)
 	var collision := CollisionShape3D.new()
@@ -181,9 +196,7 @@ func _create_road(pos: Vector3, road_size: Vector3) -> void:
 	mesh.size = road_size
 	visual.mesh = mesh
 	visual.position = pos
-	var asphalt := StandardMaterial3D.new()
-	asphalt.albedo_color = Color(0.105, 0.12, 0.13)
-	asphalt.roughness = 0.98
+	var asphalt := _make_pbr_material("Asphalt021_2K-JPG", Color(0.72, 0.74, 0.76), Vector3(7.0, 7.0, 1.0))
 	visual.material_override = asphalt
 	road.add_child(visual)
 	var collision := CollisionShape3D.new()
@@ -211,12 +224,9 @@ func _create_road(pos: Vector3, road_size: Vector3) -> void:
 func _create_building(pos: Vector3, size: Vector3, color: Color) -> void:
 	var building := StaticBody3D.new()
 	building.position = pos + Vector3(0.0, size.y * 0.5, 0.0)
-	var wall_material := StandardMaterial3D.new()
-	wall_material.albedo_color = color
-	wall_material.roughness = 0.92
-	var inside_material := StandardMaterial3D.new()
-	inside_material.albedo_color = color.darkened(0.22)
-	inside_material.roughness = 1.0
+	var wall_pack := "Bricks066_2K-JPG" if color.r > 0.56 else "Concrete012_2K-JPG"
+	var wall_material := _make_pbr_material(wall_pack, color.lightened(0.16), Vector3(2.6, 2.6, 1.0))
+	var inside_material := _make_pbr_material("Concrete012_2K-JPG", color.darkened(0.18), Vector3(2.2, 2.2, 1.0))
 	var wall_height := maxf(2.8, size.y - 0.3)
 	var wall_y := -size.y * 0.5 + wall_height * 0.5
 	_building_piece(building, Vector3(size.x, 0.3, size.z), Vector3(0.0, -size.y * 0.5 - 0.08, 0.0), inside_material)
