@@ -65,10 +65,28 @@ func spawn_loot(pos: Vector2, loot_type: int) -> void:
 
 func setup_mobile_ui(player: CharacterBody2D) -> void:
 	var canvas := CanvasLayer.new()
+
+	# Direcional touch à esquerda. Também mantém os controles de teclado.
+	_add_move_button(canvas, "↑", Vector2(170, 700), "ui_up")
+	_add_move_button(canvas, "←", Vector2(60, 810), "ui_left")
+	_add_move_button(canvas, "→", Vector2(280, 810), "ui_right")
+	_add_move_button(canvas, "↓", Vector2(170, 920), "ui_down")
+
 	var shoot_btn := Button.new()
 	shoot_btn.text = "ATIRAR"
 	shoot_btn.custom_minimum_size = Vector2(180, 180)
 	shoot_btn.position = Vector2(1600, 800)
+	shoot_btn.add_theme_font_size_override("font_size", 28)
 	shoot_btn.pressed.connect(Callable(player, "shoot"))
 	canvas.add_child(shoot_btn)
 	add_child(canvas)
+
+func _add_move_button(canvas: CanvasLayer, label: String, button_position: Vector2, action: String) -> void:
+	var button := Button.new()
+	button.text = label
+	button.custom_minimum_size = Vector2(100, 100)
+	button.position = button_position
+	button.add_theme_font_size_override("font_size", 34)
+	button.button_down.connect(func() -> void: Input.action_press(action))
+	button.button_up.connect(func() -> void: Input.action_release(action))
+	canvas.add_child(button)
