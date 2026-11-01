@@ -27,6 +27,7 @@ func _ready() -> void:
 	_create_bots()
 	_create_loot()
 	_create_hud()
+	_check_mesh_instances()
 
 func _process(delta: float) -> void:
 	if not is_instance_valid(player):
@@ -54,6 +55,13 @@ func _process(delta: float) -> void:
 		status_label.text = "ELIMINADO  |  FIM DE PARTIDA"
 	elif get_tree().get_nodes_in_group("bots").is_empty():
 		status_label.text = "VITÓRIA  |  TODOS OS INIMIGOS ELIMINADOS"
+
+
+func _check_mesh_instances() -> void:
+	for node in find_children("*", "MeshInstance3D", true, false):
+		var mesh_node := node as MeshInstance3D
+		if mesh_node.mesh == null:
+			push_error("MeshInstance3D sem malha: " + str(mesh_node.get_path()))
 
 func _setup_environment() -> void:
 	var world := WorldEnvironment.new()
