@@ -1,9 +1,9 @@
 extends Node2D
 
 const ENEMY_COUNT: int = 5
-var player: CharacterBody2D
-var game_hud: CanvasLayer
-var match_manager: Node
+var player
+var game_hud
+var match_manager
 
 func _ready() -> void:
 	var asset_gen = load("res://scripts/AssetGenerator.gd")
@@ -38,7 +38,7 @@ func _ready() -> void:
 	match_manager = Node.new()
 	match_manager.name = "MatchManager"
 	match_manager.set_script(load("res://scripts/MatchManager.gd"))
-	match_manager.total_enemies = ENEMY_COUNT
+	match_manager.set("total_enemies", ENEMY_COUNT)
 	add_child(match_manager)
 
 	game_hud = CanvasLayer.new()
