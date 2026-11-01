@@ -13,6 +13,8 @@ var target: Node3D
 var attack_cooldown: float = 0.0
 var left_leg_pivot: Node3D
 var right_leg_pivot: Node3D
+var right_arm_pivot: Node3D
+var dead: bool = false
 var walk_clock: float = 0.0
 
 func _ready() -> void:
@@ -21,6 +23,8 @@ func _ready() -> void:
 	_build_bot()
 
 func _physics_process(delta: float) -> void:
+	if dead:
+		return
 	if not is_instance_valid(target):
 		var players := get_tree().get_nodes_in_group("player")
 		if players.size() > 0:
@@ -49,6 +53,8 @@ func _physics_process(delta: float) -> void:
 		_reset_legs(delta)
 		if distance > 0.1:
 			rotation.y = lerp_angle(rotation.y, atan2(-offset.x, -offset.z), 8.0 * delta)
+		if is_instance_valid(right_arm_pivot):
+			right_arm_pivot.rotation.x = lerpf(right_arm_pivot.rotation.x, -0.62, delta * 7.0)
 		if attack_cooldown <= 0.0:
 			_fire_at_target()
 			attack_cooldown = fire_rate
@@ -93,6 +99,7 @@ func _build_bot() -> void:
 	_make_box_on(left_arm, Vector3(0.19, 0.14, 0.18), Vector3(0.0, -0.65, -0.02), armor)
 	var right_arm := Node3D.new()
 	right_arm.position = Vector3(0.42, 1.58, 0.0)
+	right_arm_pivot = right_arm
 	add_child(right_arm)
 	_make_capsule_on(right_arm, 0.13, 0.68, Vector3(0.0, -0.30, -0.04), fabric)
 	_make_box_on(right_arm, Vector3(0.19, 0.14, 0.18), Vector3(0.0, -0.65, -0.08), armor)
@@ -165,6 +172,13 @@ func _fire_at_target() -> void:
 		target.call("take_damage", damage)
 
 func take_damage(amount: float) -> void:
+	if dead:
+		return
 	health = maxf(0.0, health - amount)
 	if health <= 0.0:
-		queue_free()
+		dead = true
+		velocity = Vector3.ZERO
+		set_physics_process(false)
+		var tween := create_tween()
+		tween.tween_property(self, "rotation:z", deg_to_rad(88.0), 0.55)
+		tween.tween_callback(queue_free).set_delay(1.1)
