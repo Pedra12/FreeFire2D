@@ -265,9 +265,15 @@ func _create_weapon_visual(index: int) -> void:
 		if weapon != null:
 			weapon.name = "EquippedFirearm"
 			weapon.scale = Vector3.ONE
-			weapon.position = Vector3(0.38, 1.10, -0.48)
-			weapon.rotation = Vector3(0.0, PI, 0.0)
-			add_child(weapon)
+			var right_hand := character_model.find_child("Bip01 R Hand", true, false) as Node3D
+			if right_hand != null:
+				weapon.position = Vector3(0.0, -0.02, -0.10)
+				weapon.rotation = Vector3(0.0, PI, 0.0)
+				right_hand.add_child(weapon)
+			else:
+				weapon.position = Vector3(0.38, 1.10, -0.48)
+				weapon.rotation = Vector3(0.0, PI, 0.0)
+				add_child(weapon)
 			return
 	push_warning("Firearm model unavailable, using temporary mesh: " + weapon_path)
 	weapon = _make_box(Vector3(0.13, 0.13, 0.85), Vector3(0.38, 1.10, -0.48), _weapon_material())
