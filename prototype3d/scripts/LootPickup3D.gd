@@ -29,9 +29,9 @@ func _build_visual() -> void:
 
 func _on_body_entered(body: Node3D) -> void:
 	if loot_type == "ammo" and body.has_method("add_ammo"):
-		body.add_ammo(amount)
+		body.call("add_ammo", amount)
 	elif loot_type == "medkit" and body.has_method("heal"):
-		body.heal(float(amount))
+		body.call("heal", float(amount))
 	else:
 		return
 	queue_free()
