@@ -13,6 +13,10 @@ mkdir -p prototype3d/assets/codelove
 curl -fL --retry 3 --connect-timeout 20 https://models.codelove.in/models/military-male-02.glb -o prototype3d/assets/codelove/military-male-02.glb
 curl -fL --retry 3 --connect-timeout 20 https://models.codelove.in/models/military-male-03.glb -o prototype3d/assets/codelove/military-male-03.glb
 curl -fL --retry 3 --connect-timeout 20 https://models.codelove.in/models/military-male-04.glb -o prototype3d/assets/codelove/military-male-04.glb
+mkdir -p prototype3d/assets/codelove/animations
+curl -fL --retry 3 --connect-timeout 20 https://models.codelove.in/animations/m_idle_neutral_01.glb -o prototype3d/assets/codelove/animations/m_idle_neutral_01.glb
+curl -fL --retry 3 --connect-timeout 20 https://models.codelove.in/animations/m_walk_neutral_01.glb -o prototype3d/assets/codelove/animations/m_walk_neutral_01.glb
+curl -fL --retry 3 --connect-timeout 20 https://models.codelove.in/animations/m_run_neutral_01.glb -o prototype3d/assets/codelove/animations/m_run_neutral_01.glb
 fetch car-kit suv.glb
 fetch car-kit police.glb
 fetch car-kit sedan-sports.glb
@@ -37,9 +41,9 @@ TMP_DIR="$(mktemp -d)"
 git clone --depth 1 https://github.com/zeux/meshoptimizer.git "$TMP_DIR/meshoptimizer"
 cmake -S "$TMP_DIR/meshoptimizer" -B "$TMP_DIR/build" -DMESHOPT_BUILD_GLTFPACK=ON -DCMAKE_BUILD_TYPE=Release
 cmake --build "$TMP_DIR/build" --target gltfpack --parallel 2
-for model in prototype3d/assets/codelove/*.glb; do
+while IFS= read -r model; do
   converted="${model%.glb}.godot.glb"
   "$TMP_DIR/build/gltfpack" -i "$model" -o "$converted" -noq -kn -km -ke
   mv "$converted" "$model"
-done
+done < <(find prototype3d/assets/codelove -type f -name "*.glb" -print)
 rm -rf "$TMP_DIR"
