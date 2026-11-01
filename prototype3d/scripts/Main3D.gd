@@ -114,6 +114,10 @@ func _create_map_features() -> void:
 	_create_building(Vector3(-15, 0, -8), Vector3(8, 4, 8), Color(0.68, 0.62, 0.48))
 	_create_building(Vector3(16, 0, 15), Vector3(12, 6, 10), Color(0.52, 0.55, 0.58))
 	_create_building(Vector3(-18, 0, 17), Vector3(9, 4.5, 11), Color(0.60, 0.43, 0.34))
+	_create_building(Vector3(31, 0, -13), Vector3(7, 4, 8), Color(0.58, 0.48, 0.37))
+	_create_building(Vector3(-32, 0, -29), Vector3(8, 4.5, 9), Color(0.48, 0.53, 0.50))
+	_create_building(Vector3(31, 0, 30), Vector3(8, 3.8, 8), Color(0.62, 0.56, 0.43))
+	_create_building(Vector3(-32, 0, 31), Vector3(7, 4, 8), Color(0.52, 0.47, 0.40))
 	for i in range(28):
 		var x := sin(float(i) * 2.4) * 36.0
 		var z := cos(float(i) * 1.7) * 36.0
