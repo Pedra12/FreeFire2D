@@ -105,11 +105,6 @@ func _make_pbr_material(pack_name: String, tint: Color, uv_scale: Vector3) -> St
 	material.normal_scale = 0.72
 	material.roughness_texture = load(folder + "Roughness.jpg") as Texture2D
 	material.roughness_texture_channel = BaseMaterial3D.TEXTURE_CHANNEL_GRAYSCALE
-	var ao_map := load(folder + "AmbientOcclusion.jpg") as Texture2D
-	if ao_map != null:
-		material.ao_enabled = true
-		material.ao_texture = ao_map
-		material.ao_texture_channel = BaseMaterial3D.TEXTURE_CHANNEL_GRAYSCALE
 	material.roughness = 0.88
 	material.uv1_scale = uv_scale
 	return material
