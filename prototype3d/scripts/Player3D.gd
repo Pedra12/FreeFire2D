@@ -57,6 +57,7 @@ var recoil_amount: float = 0.0
 var character_model: Node3D
 var model_animation_player: AnimationPlayer
 var active_model_animation: StringName = &""
+var mobile_move_vector: Vector2 = Vector2.ZERO
 
 func _ready() -> void:
 	health = max_health
@@ -71,7 +72,8 @@ func _ready() -> void:
 func _physics_process(delta: float) -> void:
 	if death_state:
 		return
-	var input_vector := Input.get_vector("move_left", "move_right", "move_forward", "move_back")
+	var keyboard_vector := Input.get_vector("move_left", "move_right", "move_forward", "move_back")
+	var input_vector := mobile_move_vector if mobile_move_vector.length() > 0.01 else keyboard_vector
 	var basis_yaw := Basis(Vector3.UP, camera_yaw)
 	var direction := basis_yaw * Vector3(input_vector.x, 0.0, input_vector.y)
 	direction.y = 0.0
@@ -96,7 +98,9 @@ func _physics_process(delta: float) -> void:
 			footstep_audio.play()
 			footstep_timer = 0.38 if Input.is_action_pressed("sprint") else 0.52
 		var target_angle := atan2(-direction.x, -direction.z)
-		rotation.y = lerp_angle(rotation.y, target_angle, 10.0 * delta)
+		rotation.y = lerp_angle(rotation.y, target_angle, 14.0 * delta)
+		if is_instance_valid(camera_pivot):
+			camera_pivot.rotation.y = wrapf(camera_yaw - rotation.y, -PI, PI)
 		walk_clock += delta * 10.0
 		if is_instance_valid(left_leg_pivot):
 			left_leg_pivot.rotation.x = sin(walk_clock) * 0.42
@@ -107,6 +111,8 @@ func _physics_process(delta: float) -> void:
 		if is_instance_valid(left_leg_pivot):
 			left_leg_pivot.rotation.x = move_toward(left_leg_pivot.rotation.x, 0.0, delta * 3.0)
 			right_leg_pivot.rotation.x = move_toward(right_leg_pivot.rotation.x, 0.0, delta * 3.0)
+		if is_instance_valid(camera_pivot):
+			camera_pivot.rotation.y = wrapf(camera_yaw - rotation.y, -PI, PI)
 	fire_cooldown = maxf(0.0, fire_cooldown - delta)
 	recoil_amount = move_toward(recoil_amount, 0.0, delta * 3.5)
 	muzzle_timer = maxf(0.0, muzzle_timer - delta)
@@ -143,9 +149,12 @@ func _input(event: InputEvent) -> void:
 
 func _rotate_camera(delta: Vector2) -> void:
 	camera_yaw -= delta.x
-	camera_pitch = clampf(camera_pitch - delta.y, -0.75, 0.25)
+	camera_pitch = clampf(camera_pitch - delta.y, -0.72, 0.22)
 	if is_instance_valid(camera_pivot):
-		camera_pivot.rotation = Vector3(camera_pitch, camera_yaw, 0.0)
+		camera_pivot.rotation = Vector3(camera_pitch, wrapf(camera_yaw - rotation.y, -PI, PI), 0.0)
+
+func set_mobile_move_vector(value: Vector2) -> void:
+	mobile_move_vector = value.limit_length(1.0)
 
 func _build_collision() -> void:
 	var collision := CollisionShape3D.new()
@@ -161,8 +170,10 @@ func _build_character() -> void:
 	if character_scene != null:
 		character_model = character_scene.instantiate() as Node3D
 		if character_model != null:
-			character_model.name = "RootNode"
+				character_model.name = "RootNode"
 			character_model.scale = Vector3.ONE
+			# Imported soldier rig faces +Z; the Godot character forward axis is -Z.
+			character_model.rotation.y = PI
 			add_child(character_model)
 			model_animation_player = AnimationPlayer.new()
 			model_animation_player.name = "SoldierAnimationPlayer"
@@ -440,7 +451,7 @@ func _make_sphere(pos: Vector3, scale_value: Vector3, material: Material) -> Mes
 func _build_camera() -> void:
 	camera_pivot = Node3D.new()
 	camera_pivot.position = Vector3(0.0, 1.55, 0.0)
-	camera_pivot.rotation = Vector3(camera_pitch, camera_yaw, 0.0)
+	camera_pivot.rotation = Vector3(camera_pitch, wrapf(camera_yaw - rotation.y, -PI, PI), 0.0)
 	add_child(camera_pivot)
 	spring_arm = SpringArm3D.new()
 	spring_arm.spring_length = 5.2
