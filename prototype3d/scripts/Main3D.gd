@@ -11,22 +11,42 @@ var health_label: Label
 var ammo_label: Label
 var enemies_label: Label
 var status_label: Label
+var zone_label: Label
+var zone_ring: MeshInstance3D
+var safe_zone_radius: float = 48.0
+var zone_elapsed: float = 0.0
+var zone_damage_elapsed: float = 0.0
 
 func _ready() -> void:
 	_setup_environment()
 	_create_ground()
+	_create_zone_ring()
 	_create_map_features()
 	_create_player()
 	_create_bots()
 	_create_loot()
 	_create_hud()
 
-func _process(_delta: float) -> void:
+func _process(delta: float) -> void:
 	if not is_instance_valid(player):
 		return
 	health_label.text = "VIDA  %d / %d" % [roundi(player.health), roundi(player.max_health)]
 	ammo_label.text = "%s  |  MUNIÇÃO  %d / %d" % [player.weapon_name, player.ammo, player.reserve_ammo]
 	enemies_label.text = "INIMIGOS  %d" % get_tree().get_nodes_in_group("bots").size()
+	zone_elapsed += delta
+	if zone_elapsed >= 10.0 and safe_zone_radius > 12.0:
+		zone_elapsed = 0.0
+		safe_zone_radius = maxf(12.0, safe_zone_radius - 1.0)
+		_update_zone_ring()
+	zone_label.text = "ZONA SEGURA  %.0f m" % safe_zone_radius
+	zone_damage_elapsed += delta
+	if zone_damage_elapsed >= 1.0:
+		zone_damage_elapsed = 0.0
+		if Vector2(player.global_position.x, player.global_position.z).length() > safe_zone_radius:
+			player.take_damage(6.0)
+		for enemy in get_tree().get_nodes_in_group("bots"):
+			if Vector2(enemy.global_position.x, enemy.global_position.z).length() > safe_zone_radius:
+				enemy.take_damage(6.0)
 	if player.health <= 0.0:
 		status_label.text = "ELIMINADO  |  FIM DE PARTIDA"
 	elif get_tree().get_nodes_in_group("bots").is_empty():
@@ -47,6 +67,27 @@ func _setup_environment() -> void:
 	sun.light_energy = 1.25
 	sun.shadow_enabled = true
 	add_child(sun)
+
+func _create_zone_ring() -> void:
+	zone_ring = MeshInstance3D.new()
+	zone_ring.name = "SafeZoneBoundary"
+	add_child(zone_ring)
+	_update_zone_ring()
+
+func _update_zone_ring() -> void:
+	if not is_instance_valid(zone_ring):
+		return
+	var ring := ImmediateMesh.new()
+	var material := StandardMaterial3D.new()
+	material.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	material.albedo_color = Color(0.12, 0.62, 1.0, 0.9)
+	material.no_depth_test = true
+	ring.surface_begin(Mesh.PRIMITIVE_LINE_STRIP, material)
+	for i in range(65):
+		var angle := TAU * float(i) / 64.0
+		ring.surface_add_vertex(Vector3(cos(angle) * safe_zone_radius, 0.08, sin(angle) * safe_zone_radius))
+	ring.surface_end()
+	zone_ring.mesh = ring
 
 func _create_ground() -> void:
 	var ground := StaticBody3D.new()
@@ -215,6 +256,13 @@ func _create_hud() -> void:
 	enemies_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
 	enemies_label.add_theme_font_size_override("font_size", 19)
 	root.add_child(enemies_label)
+
+	zone_label = Label.new()
+	zone_label.position = Vector2(screen.x - 230.0, 54.0)
+	zone_label.size = Vector2(210.0, 30.0)
+	zone_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
+	zone_label.add_theme_font_size_override("font_size", 17)
+	root.add_child(zone_label)
 
 	status_label = Label.new()
 	status_label.text = "ELIMINE OS BOTS E COLETE SUPRIMENTOS"
