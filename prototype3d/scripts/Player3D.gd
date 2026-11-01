@@ -38,7 +38,7 @@ var fire_cooldown: float = 0.0
 var camera_pivot: Node3D
 var spring_arm: SpringArm3D
 var camera: Camera3D
-var weapon: MeshInstance3D
+var weapon: Node3D
 var shot_ray: RayCast3D
 var shot_audio: AudioStreamPlayer3D
 var muzzle_light: OmniLight3D
@@ -158,7 +158,7 @@ func _build_character() -> void:
 			add_child(model_animation_player)
 			_load_external_animation_clips()
 			_play_model_animation("idle")
-			weapon = _make_box(Vector3(0.13, 0.13, 0.85), Vector3(0.39, 1.08, -0.43), _weapon_material())
+			_create_weapon_visual(weapon_index)
 			return
 	var armor := StandardMaterial3D.new()
 	armor.albedo_color = Color(0.12, 0.20, 0.18)
@@ -247,6 +247,30 @@ func _load_external_animation_clips() -> void:
 	if library.get_animation_list().size() > 0:
 		model_animation_player.add_animation_library("", library)
 		print("Retargeted soldier clips: ", library.get_animation_list())
+
+
+func _create_weapon_visual(index: int) -> void:
+	if is_instance_valid(weapon):
+		weapon.queue_free()
+	var weapon_files := [
+		"rifle_assault.glb",
+		"pistol_full.glb",
+		"shotgun_pump.glb",
+		"smg_full.glb"
+	]
+	var weapon_path := "res://assets/fps/weapons/" + weapon_files[index % weapon_files.size()]
+	var packed := load(weapon_path) as PackedScene
+	if packed != null:
+		weapon = packed.instantiate() as Node3D
+		if weapon != null:
+			weapon.name = "EquippedFirearm"
+			weapon.scale = Vector3.ONE
+			weapon.position = Vector3(0.38, 1.10, -0.48)
+			weapon.rotation = Vector3(0.0, PI, 0.0)
+			add_child(weapon)
+			return
+	push_warning("Firearm model unavailable, using temporary mesh: " + weapon_path)
+	weapon = _make_box(Vector3(0.13, 0.13, 0.85), Vector3(0.38, 1.10, -0.48), _weapon_material())
 
 func _weapon_material() -> Material:
 	var material := StandardMaterial3D.new()
@@ -409,12 +433,7 @@ func switch_weapon() -> void:
 	weapon_fire_interval = weapon_intervals[weapon_index]
 	ammo = weapon_magazines[weapon_index]
 	reserve_ammo = weapon_reserves[weapon_index]
-	var weapon_sizes: Array[Vector3] = [Vector3(0.13, 0.13, 0.85), Vector3(0.11, 0.12, 0.42), Vector3(0.18, 0.18, 0.72), Vector3(0.12, 0.13, 0.62)]
-	var weapon_size: Vector3 = weapon_sizes[weapon_index]
-	if is_instance_valid(weapon):
-		var mesh := BoxMesh.new()
-		mesh.size = weapon_size
-		weapon.mesh = mesh
+	_create_weapon_visual(weapon_index)
 	is_reloading = false
 	reload_timer = 0.0
 	fire_cooldown = 0.0
