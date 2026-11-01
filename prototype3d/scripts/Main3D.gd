@@ -46,7 +46,7 @@ func _process(delta: float) -> void:
 			player.take_damage(6.0)
 		for enemy in get_tree().get_nodes_in_group("bots"):
 			if Vector2(enemy.global_position.x, enemy.global_position.z).length() > safe_zone_radius:
-				enemy.take_damage(6.0)
+				enemy.call("take_damage", 6.0)
 	if player.health <= 0.0:
 		status_label.text = "ELIMINADO  |  FIM DE PARTIDA"
 	elif get_tree().get_nodes_in_group("bots").is_empty():
