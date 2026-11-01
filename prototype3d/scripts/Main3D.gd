@@ -144,6 +144,10 @@ func _create_map_features() -> void:
 	_create_road(Vector3(0.0, 0.02, 0.0), Vector3(76.0, 0.035, 5.0))
 	_create_vehicle(Vector3(8.0, 0.0, 3.7), 0.25)
 	_create_vehicle(Vector3(-8.0, 0.0, -3.7), PI)
+	_spawn_asset(self, "city-kit-roads/light-curved.glb", Vector3(4.0, 0.0, -10.0), 1.8, 0.0)
+	_spawn_asset(self, "city-kit-roads/light-curved.glb", Vector3(-4.0, 0.0, 10.0), 1.8, PI)
+	_spawn_asset(self, "city-kit-roads/dumpster.glb", Vector3(19.0, 0.0, -13.0), 1.3)
+	_spawn_asset(self, "city-kit-roads/road-sign-street.glb", Vector3(-7.0, 0.0, 5.0), 1.5)
 
 func _create_building(pos: Vector3, size: Vector3, color: Color) -> void:
 	var building := StaticBody3D.new()
@@ -195,6 +199,11 @@ func _create_building(pos: Vector3, size: Vector3, color: Color) -> void:
 	crate_material.albedo_color = Color(0.32, 0.24, 0.14)
 	crate.material_override = crate_material
 	building.add_child(crate)
+	# Furniture and loot cover inside the playable building shell.
+	_spawn_asset(building, "furniture-kit/beddouble.glb", Vector3(-size.x * 0.22, -size.y * 0.5 + 0.12, size.z * 0.18), 0.9)
+	_spawn_asset(building, "furniture-kit/chair.glb", Vector3(size.x * 0.20, -size.y * 0.5 + 0.05, -size.z * 0.10), 0.9)
+	_spawn_asset(building, "furniture-kit/desk.glb", Vector3(size.x * 0.20, -size.y * 0.5 + 0.05, -size.z * 0.28), 0.85)
+	_spawn_asset(building, "furniture-kit/cardboardboxclosed.glb", Vector3(-size.x * 0.25, -size.y * 0.5 + 0.1, -size.z * 0.25), 0.8)
 	add_child(building)
 
 func _building_piece(parent: StaticBody3D, piece_size: Vector3, piece_position: Vector3, material: Material) -> void:
@@ -214,125 +223,49 @@ func _building_piece(parent: StaticBody3D, piece_size: Vector3, piece_position: 
 
 func _create_tree(pos: Vector3) -> void:
 	var tree := StaticBody3D.new()
+	tree.name = "KenneyTree"
 	tree.position = pos
-	var trunk := MeshInstance3D.new()
-	var trunk_mesh := CylinderMesh.new()
-	trunk_mesh.top_radius = 0.22
-	trunk_mesh.bottom_radius = 0.32
-	trunk_mesh.height = 2.0
-	trunk.mesh = trunk_mesh
-	trunk.position.y = 1.0
-	var bark := StandardMaterial3D.new()
-	bark.albedo_color = Color(0.30, 0.20, 0.12)
-	trunk.material_override = bark
-	tree.add_child(trunk)
-	var leaves := MeshInstance3D.new()
-	var leaves_mesh := SphereMesh.new()
-	leaves_mesh.radius = 1.25
-	leaves_mesh.height = 2.5
-	leaves.mesh = leaves_mesh
-	leaves.position.y = 2.65
-	var foliage := StandardMaterial3D.new()
-	foliage.albedo_color = Color(0.12, 0.31, 0.13)
-	leaves.material_override = foliage
-	tree.add_child(leaves)
+	var variant := "tree-default.glb" if int(absf(pos.x * 11.0 + pos.z * 7.0)) % 2 == 0 else "tree-palm.glb"
+	_spawn_asset(tree, "nature-kit/" + variant, Vector3.ZERO, 1.35)
 	var collision := CollisionShape3D.new()
 	var shape := CylinderShape3D.new()
-	shape.radius = 0.38
-	shape.height = 2.0
+	shape.radius = 0.48
+	shape.height = 3.2
 	collision.shape = shape
-	collision.position.y = 1.0
+	collision.position.y = 1.6
 	tree.add_child(collision)
 	add_child(tree)
-
-func _create_road(pos: Vector3, size: Vector3) -> void:
-	var road := MeshInstance3D.new()
-	var mesh := BoxMesh.new()
-	mesh.size = size
-	road.mesh = mesh
-	road.position = pos
-	var material := StandardMaterial3D.new()
-	material.albedo_color = Color(0.20, 0.21, 0.19)
-	material.roughness = 1.0
-	road.material_override = material
-	add_child(road)
-	var stripe_material := StandardMaterial3D.new()
-	stripe_material.albedo_color = Color(0.82, 0.78, 0.58)
-	stripe_material.roughness = 1.0
-	if size.z > size.x:
-		for i in range(12):
-			var stripe := MeshInstance3D.new()
-			var stripe_mesh := BoxMesh.new()
-			stripe_mesh.size = Vector3(0.12, 0.035, 2.0)
-			stripe.mesh = stripe_mesh
-			stripe.position = pos + Vector3(0.0, 0.035, -size.z * 0.5 + 3.0 + float(i) * 6.0)
-			stripe.material_override = stripe_material
-			add_child(stripe)
-	else:
-		for i in range(12):
-			var stripe := MeshInstance3D.new()
-			var stripe_mesh := BoxMesh.new()
-			stripe_mesh.size = Vector3(2.0, 0.035, 0.12)
-			stripe.mesh = stripe_mesh
-			stripe.position = pos + Vector3(-size.x * 0.5 + 3.0 + float(i) * 6.0, 0.035, 0.0)
-			stripe.material_override = stripe_material
-			add_child(stripe)
-
 
 func _create_vehicle(pos: Vector3, heading: float) -> void:
 	var vehicle := StaticBody3D.new()
 	vehicle.name = "ParkedVehicle"
 	vehicle.position = pos
 	vehicle.rotation.y = heading
-	var paint := StandardMaterial3D.new()
-	paint.albedo_color = Color(0.16, 0.24, 0.27)
-	paint.metallic = 0.45
-	paint.roughness = 0.38
-	var glass := StandardMaterial3D.new()
-	glass.albedo_color = Color(0.08, 0.16, 0.19, 0.82)
-	glass.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
-	var rubber := StandardMaterial3D.new()
-	rubber.albedo_color = Color(0.025, 0.03, 0.03)
-	var chassis := MeshInstance3D.new()
-	var chassis_mesh := BoxMesh.new()
-	chassis_mesh.size = Vector3(2.1, 0.72, 3.6)
-	chassis.mesh = chassis_mesh
-	chassis.position.y = 0.72
-	chassis.material_override = paint
-	vehicle.add_child(chassis)
-	var cabin := MeshInstance3D.new()
-	var cabin_mesh := BoxMesh.new()
-	cabin_mesh.size = Vector3(1.72, 0.82, 1.85)
-	cabin.mesh = cabin_mesh
-	cabin.position = Vector3(0.0, 1.42, 0.05)
-	cabin.material_override = glass
-	vehicle.add_child(cabin)
-	for x in [-0.92, 0.92]:
-		for z in [-1.18, 1.18]:
-			var wheel := MeshInstance3D.new()
-			var wheel_mesh := CylinderMesh.new()
-			wheel_mesh.top_radius = 0.42
-			wheel_mesh.bottom_radius = 0.42
-			wheel_mesh.height = 0.22
-			wheel.mesh = wheel_mesh
-			wheel.rotation.z = PI * 0.5
-			wheel.position = Vector3(x, 0.42, z)
-			wheel.material_override = rubber
-			vehicle.add_child(wheel)
-	var bumper := MeshInstance3D.new()
-	var bumper_mesh := BoxMesh.new()
-	bumper_mesh.size = Vector3(2.18, 0.18, 0.22)
-	bumper.mesh = bumper_mesh
-	bumper.position = Vector3(0.0, 0.48, -1.82)
-	bumper.material_override = rubber
-	vehicle.add_child(bumper)
+	var model := "car-kit/suv.glb" if pos.x > 0.0 else "car-kit/police.glb"
+	_spawn_asset(vehicle, model, Vector3.ZERO, 1.35)
 	var collision := CollisionShape3D.new()
 	var shape := BoxShape3D.new()
-	shape.size = Vector3(2.15, 1.55, 3.65)
+	shape.size = Vector3(2.15, 1.7, 4.1)
 	collision.shape = shape
-	collision.position.y = 0.82
+	collision.position.y = 0.85
 	vehicle.add_child(collision)
 	add_child(vehicle)
+
+func _spawn_asset(parent: Node3D, asset_file: String, local_position: Vector3, asset_scale: float = 1.0, yaw: float = 0.0) -> Node3D:
+	var path := "res://assets/kenney/" + asset_file
+	var packed := load(path) as PackedScene
+	if packed == null:
+		push_warning("Asset 3D ausente ou não importado: " + path)
+		return null
+	var instance := packed.instantiate() as Node3D
+	if instance == null:
+		push_warning("Asset 3D não possui raiz Node3D: " + path)
+		return null
+	instance.position = local_position
+	instance.scale = Vector3.ONE * asset_scale
+	instance.rotation.y = yaw
+	parent.add_child(instance)
+	return instance
 
 func _create_player() -> void:
 	player = PLAYER_SCRIPT.new()
