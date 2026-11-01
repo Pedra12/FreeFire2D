@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 set -euo pipefail
+set -x
 BASE="https://raw.githubusercontent.com/Hidencod/tge-assets/main/packs"
 OUT="prototype3d/assets/kenney"
 fetch() {
