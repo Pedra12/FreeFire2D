@@ -28,7 +28,9 @@ func _process(_delta: float) -> void:
 	ammo_label.text = "MUNIÇÃO  %d / %d" % [player.ammo, player.reserve_ammo]
 	enemies_label.text = "INIMIGOS  %d" % get_tree().get_nodes_in_group("bots").size()
 	if player.health <= 0.0:
-		status_label.text = "ELIMINADO  |  REINICIE A PARTIDA"
+		status_label.text = "ELIMINADO  |  FIM DE PARTIDA"
+	elif get_tree().get_nodes_in_group("bots").is_empty():
+		status_label.text = "VITÓRIA  |  TODOS OS INIMIGOS ELIMINADOS"
 
 func _setup_environment() -> void:
 	var world := WorldEnvironment.new()
@@ -239,7 +241,8 @@ func _create_hud() -> void:
 	fire.custom_minimum_size = Vector2(145.0, 115.0)
 	fire.size = Vector2(145.0, 115.0)
 	fire.add_theme_font_size_override("font_size", 22)
-	fire.button_down.connect(player.shoot)
+	fire.button_down.connect(player.set_firing.bind(true))
+	fire.button_up.connect(player.set_firing.bind(false))
 	root.add_child(fire)
 
 	var aim_button := Button.new()
