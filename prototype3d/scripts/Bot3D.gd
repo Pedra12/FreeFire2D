@@ -77,14 +77,15 @@ func _build_bot() -> void:
 	if character_scene != null:
 		character_model = character_scene.instantiate() as Node3D
 		if character_model != null:
-			character_model.name = "BotCharacterModel"
+			character_model.name = "RootNode"
 			character_model.scale = Vector3.ONE
 			add_child(character_model)
-			model_animation_player = _find_animation_player(character_model)
-			if model_animation_player != null:
-				print("Imported character animation clips: ", model_animation_player.get_animation_list())
-			else:
-				push_warning("Imported soldier model has no AnimationPlayer")
+			model_animation_player = AnimationPlayer.new()
+			model_animation_player.name = "BotAnimationPlayer"
+			model_animation_player.root_node = NodePath("..")
+			add_child(model_animation_player)
+			_load_external_animation_clips()
+			_play_model_animation("idle")
 			return
 	var armor := StandardMaterial3D.new()
 	armor.albedo_color = Color(0.25, 0.09, 0.08)
@@ -137,6 +138,39 @@ func _build_bot() -> void:
 	_make_box_on(right_leg_pivot, Vector3(0.30, 0.16, 0.43), Vector3(0.0, -0.72, -0.08), armor)
 	_make_box(Vector3(0.13, 0.13, 0.72), Vector3(0.39, 1.25, -0.40), metal)
 
+
+
+func _load_external_animation_clips() -> void:
+	var clip_files := {
+		"idle": "m_idle_neutral_01.glb",
+		"walk": "m_walk_neutral_01.glb",
+		"run": "m_run_neutral_01.glb"
+	}
+	var library := AnimationLibrary.new()
+	for state_name in clip_files:
+		var clip_path := "res://assets/codelove/animations/" + String(clip_files[state_name])
+		var clip_scene := load(clip_path) as PackedScene
+		if clip_scene == null:
+			continue
+		var clip_root := clip_scene.instantiate()
+		add_child(clip_root)
+		var source_player := _find_animation_player(clip_root)
+		if source_player != null:
+			var names := source_player.get_animation_list()
+			if not names.is_empty():
+				var copied_animation := source_player.get_animation(names[0]).duplicate(true) as Animation
+				library.add_animation(StringName(state_name), copied_animation)
+		clip_root.queue_free()
+	if library.get_animation_list().size() > 0:
+		model_animation_player.add_animation_library("", library)
+
+func _play_model_animation(wanted: String) -> void:
+	if not is_instance_valid(model_animation_player):
+		return
+	if model_animation_player.has_animation(wanted) and model_animation_player.current_animation != wanted:
+		model_animation_player.play(wanted)
+	elif wanted == "run" and model_animation_player.has_animation("walk") and model_animation_player.current_animation != "walk":
+		model_animation_player.play("walk")
 
 func _find_animation_player(root: Node) -> AnimationPlayer:
 	if root is AnimationPlayer:
