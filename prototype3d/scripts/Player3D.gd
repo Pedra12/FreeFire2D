@@ -319,6 +319,17 @@ func heal(amount: float) -> void:
 	health = minf(max_health, health + amount)
 	stats_changed.emit()
 
+func repair_armor(amount: float) -> void:
+	armor_points = minf(100.0, armor_points + amount)
+	stats_changed.emit()
+
+func upgrade_backpack() -> void:
+	backpack_level = mini(3, backpack_level + 1)
+	for i in range(weapon_reserves.size()):
+		weapon_reserves[i] += 30
+	reserve_ammo = weapon_reserves[weapon_index]
+	stats_changed.emit()
+
 func take_damage(amount: float) -> void:
 	if death_state:
 		return
