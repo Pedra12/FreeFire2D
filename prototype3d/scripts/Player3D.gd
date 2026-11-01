@@ -111,7 +111,7 @@ func _physics_process(delta: float) -> void:
 func _input(event: InputEvent) -> void:
 	if event is InputEventScreenDrag:
 		var viewport_size := get_viewport().get_visible_rect().size
-		var over_right_hud := event.position.x > viewport_size.x * 0.75 and event.position.y > viewport_size.y * 0.55
+		var over_right_hud: bool = event.position.x > viewport_size.x * 0.75 and event.position.y > viewport_size.y * 0.55
 		if event.position.x > viewport_size.x * 0.42 and not over_right_hud:
 			_rotate_camera(event.relative * touch_sensitivity)
 	elif event is InputEventMouseMotion and Input.is_mouse_button_pressed(MOUSE_BUTTON_RIGHT):
@@ -276,7 +276,8 @@ func switch_weapon() -> void:
 	weapon_fire_interval = weapon_intervals[weapon_index]
 	ammo = weapon_magazines[weapon_index]
 	reserve_ammo = weapon_reserves[weapon_index]
-	var weapon_size := [Vector3(0.13, 0.13, 0.85), Vector3(0.11, 0.12, 0.42), Vector3(0.18, 0.18, 0.72), Vector3(0.12, 0.13, 0.62)][weapon_index]
+	var weapon_sizes: Array[Vector3] = [Vector3(0.13, 0.13, 0.85), Vector3(0.11, 0.12, 0.42), Vector3(0.18, 0.18, 0.72), Vector3(0.12, 0.13, 0.62)]
+	var weapon_size: Vector3 = weapon_sizes[weapon_index]
 	if is_instance_valid(weapon):
 		var mesh := BoxMesh.new()
 		mesh.size = weapon_size
