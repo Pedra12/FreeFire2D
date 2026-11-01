@@ -148,12 +148,14 @@ func _create_hud() -> void:
 	var title := Label.new()
 	title.text = "FREEFIRE 3D  |  PROTÓTIPO"
 	title.position = Vector2(24, 18)
+	title.size = Vector2(600, 36)
 	title.add_theme_font_size_override("font_size", 22)
 	root.add_child(title)
 
 	var help := Label.new()
 	help.text = "Arraste o lado direito para girar a câmera"
 	help.position = Vector2(24, 52)
+	help.size = Vector2(600, 30)
 	help.add_theme_font_size_override("font_size", 16)
 	root.add_child(help)
 
@@ -166,6 +168,7 @@ func _create_hud() -> void:
 	fire.text = "ATIRAR"
 	fire.position = Vector2(1080, 540)
 	fire.custom_minimum_size = Vector2(150, 120)
+	fire.size = Vector2(150, 120)
 	fire.add_theme_font_size_override("font_size", 23)
 	fire.button_down.connect(player.shoot)
 	root.add_child(fire)
@@ -173,6 +176,7 @@ func _create_hud() -> void:
 	var status := Label.new()
 	status.text = "FASE 1: MOVIMENTAÇÃO E CÂMERA"
 	status.position = Vector2(24, 90)
+	status.size = Vector2(600, 30)
 	status.add_theme_font_size_override("font_size", 16)
 	root.add_child(status)
 
@@ -183,6 +187,7 @@ func _add_hold_button(root: Control, label_text: String, pos: Vector2, action: S
 	button.text = label_text
 	button.position = pos
 	button.custom_minimum_size = Vector2(88, 88)
+	button.size = Vector2(88, 88)
 	button.add_theme_font_size_override("font_size", 30)
 	button.button_down.connect(func() -> void: Input.action_press(action))
 	button.button_up.connect(func() -> void: Input.action_release(action))
