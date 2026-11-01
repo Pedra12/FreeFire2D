@@ -14,6 +14,7 @@ var camera_pivot: Node3D
 var spring_arm: SpringArm3D
 var camera: Camera3D
 var weapon: MeshInstance3D
+var shot_ray: RayCast3D
 
 func _ready() -> void:
 	_build_collision()
@@ -116,22 +117,26 @@ func _build_camera() -> void:
 	camera.fov = 75.0
 	spring_arm.add_child(camera)
 
+	shot_ray = RayCast3D.new()
+	shot_ray.target_position = Vector3(0.0, 0.0, -100.0)
+	shot_ray.collision_mask = 1
+	shot_ray.enabled = true
+	camera.add_child(shot_ray)
+
 func shoot() -> void:
 	if fire_cooldown > 0.0:
 		return
 	fire_cooldown = 0.22
-	var origin := camera.global_position
-	var direction := -camera.global_transform.basis.z
-	var query := PhysicsRayQueryParameters3D.create(origin, origin + direction * 100.0)
-	query.exclude = [get_rid()]
-	var hit := get_world_3d().direct_space_state.intersect_ray(query)
-	if not hit.is_empty():
+	if not is_instance_valid(shot_ray):
+		return
+	shot_ray.force_raycast_update()
+	if shot_ray.is_colliding():
 		var marker := MeshInstance3D.new()
 		var marker_mesh := SphereMesh.new()
 		marker_mesh.radius = 0.07
 		marker_mesh.height = 0.14
 		marker.mesh = marker_mesh
-		marker.position = hit.position
+		marker.global_position = shot_ray.get_collision_point()
 		get_tree().current_scene.add_child(marker)
 		var timer := get_tree().create_timer(0.35)
 		timer.timeout.connect(marker.queue_free)
