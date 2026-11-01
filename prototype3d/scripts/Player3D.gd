@@ -369,25 +369,29 @@ func _build_camera() -> void:
 
 func _build_audio_and_effects() -> void:
 	shot_audio = AudioStreamPlayer3D.new()
-	shot_audio.name = "ProceduralGunshot"
-	shot_audio.volume_db = -8.0
-	shot_audio.max_distance = 55.0
-	var sample_rate := 22050
-	var sample_count := 3308
-	var samples := PackedByteArray()
-	samples.resize(sample_count * 2)
-	for i in range(sample_count):
-		var time := float(i) / float(sample_rate)
-		var envelope := exp(-time * 42.0)
-		var noise := sin(float(i) * 12.9898) * 0.18
-		var wave := (sin(TAU * 105.0 * time) * 0.72 + noise) * envelope
-		samples.encode_s16(i * 2, int(clampf(wave, -1.0, 1.0) * 30000.0))
-	var sound := AudioStreamWAV.new()
-	sound.format = AudioStreamWAV.FORMAT_16_BITS
-	sound.mix_rate = sample_rate
-	sound.stereo = false
-	sound.data = samples
-	shot_audio.stream = sound
+	shot_audio.name = "GunshotAudio"
+	shot_audio.volume_db = -7.0
+	shot_audio.max_distance = 65.0
+	var recorded_gunshot := load("res://assets/fps/audio/game_gunshot.wav") as AudioStream
+	if recorded_gunshot != null:
+		shot_audio.stream = recorded_gunshot
+	else:
+		var sample_rate := 22050
+		var sample_count := 3308
+		var samples := PackedByteArray()
+		samples.resize(sample_count * 2)
+		for i in range(sample_count):
+			var time := float(i) / float(sample_rate)
+			var envelope := exp(-time * 42.0)
+			var noise := sin(float(i) * 12.9898) * 0.18
+			var wave := (sin(TAU * 105.0 * time) * 0.72 + noise) * envelope
+			samples.encode_s16(i * 2, int(clampf(wave, -1.0, 1.0) * 30000.0))
+		var sound := AudioStreamWAV.new()
+		sound.format = AudioStreamWAV.FORMAT_16_BITS
+		sound.mix_rate = sample_rate
+		sound.stereo = false
+		sound.data = samples
+		shot_audio.stream = sound
 	add_child(shot_audio)
 
 	muzzle_light = OmniLight3D.new()
