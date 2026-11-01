@@ -17,7 +17,7 @@ Projeto independente em Godot 4.3, orientado para Android em paisagem e jogabili
 - Fluxos de CI separados para importar/testar o projeto 3D e exportar o APK Android.
 
 ## Limitações que continuam abertas
-Este ainda é um protótipo de produção, não um jogo completo nem uma cópia visual de Free Fire. A cena integra soldados militares mid-poly rigados (Male Soldier 02/03/04, licença MIT), clips retargetados de idle/caminhada/corrida, cinco modelos GLB de armas e carros, árvores, iluminação e mobiliário Kenney CC0. O disparo usa gravações CC0 do FPS Asset Kit e os passos usam áudio CC0. O resultado ainda não equivale ao nível visual de Free Fire: as armas são modelos low-poly, o mapa ainda é pequeno e faltam animações de combate completas. Mira, recarga, recoil e salto têm movimentos procedurais da arma; não são animações mocap completas de braços e corpo.
+Este ainda é um protótipo de produção, não um jogo completo nem uma cópia visual de Free Fire. A cena integra soldados militares mid-poly rigados (Male Soldier 02/03/04, licença MIT), clips retargetados de idle/caminhada/corrida, cinco modelos GLB de armas e carros, árvores, iluminação e mobiliário Kenney CC0. O disparo usa quatro variações de efeitos CC0 do SFXMint, com escolha aleatória e um perfil mais distante para o rifle de precisão; os passos usam áudio CC0. O resultado ainda não equivale ao nível visual de Free Fire: as armas são modelos low-poly, o mapa ainda é pequeno e faltam animações de combate completas. Mira, recarga, recoil e salto têm movimentos procedurais da arma; não são animações mocap completas de braços e corpo.
 
 Ainda são necessários:
 - Modelos de maior detalhe para armas, veículos e cenário, com materiais e otimização de qualidade comercial.
