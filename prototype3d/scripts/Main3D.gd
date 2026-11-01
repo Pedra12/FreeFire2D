@@ -332,7 +332,19 @@ func _create_hud() -> void:
 	_add_hold_button(root, "◀", Vector2(38.0, screen.y - 154.0), "move_left")
 	_add_hold_button(root, "▶", Vector2(172.0, screen.y - 154.0), "move_right")
 
-	var fire := Button.new()
+if not InputMap.has_action("jump"):
+		InputMap.add_action("jump")
+	var jump_button := Button.new()
+	jump_button.text = "PULAR"
+	jump_button.position = Vector2(screen.x - 300.0, screen.y - 145.0)
+	jump_button.custom_minimum_size = Vector2(100.0, 86.0)
+	jump_button.size = Vector2(100.0, 86.0)
+	jump_button.add_theme_font_size_override("font_size", 17)
+	jump_button.button_down.connect(func() -> void: Input.action_press("jump"))
+	jump_button.button_up.connect(func() -> void: Input.action_release("jump"))
+	root.add_child(jump_button)
+
+		var fire := Button.new()
 	fire.text = "ATIRAR"
 	fire.position = Vector2(screen.x - 180.0, screen.y - 150.0)
 	fire.custom_minimum_size = Vector2(145.0, 115.0)
