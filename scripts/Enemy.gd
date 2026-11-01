@@ -4,9 +4,12 @@ extends CharacterBody2D
 @export var health: float = 100.0
 @export var detection_range: float = 600.0
 @export var attack_range: float = 80.0
+@export var attack_damage: float = 10.0
+@export var attack_interval: float = 0.8
 
 var player_target: Node2D = null
 var defeated: bool = false
+var attack_timer: float = 0.0
 
 func _ready() -> void:
 	name = "Enemy"
@@ -21,9 +24,10 @@ func _ready() -> void:
 	collision.shape = shape
 	add_child(collision)
 
-func _physics_process(_delta: float) -> void:
+func _physics_process(delta: float) -> void:
 	if defeated:
 		return
+	attack_timer = maxf(0.0, attack_timer - delta)
 	if not is_instance_valid(player_target):
 		player_target = get_parent().get_node_or_null("Player") as Node2D
 	if not is_instance_valid(player_target):
@@ -32,7 +36,12 @@ func _physics_process(_delta: float) -> void:
 
 	var offset := player_target.global_position - global_position
 	var distance := offset.length()
-	if distance <= detection_range and distance > attack_range:
+	if distance <= attack_range:
+		velocity = Vector2.ZERO
+		if attack_timer <= 0.0 and player_target.has_method("take_damage"):
+			player_target.call("take_damage", attack_damage)
+			attack_timer = attack_interval
+	elif distance <= detection_range:
 		var direction := offset.normalized()
 		velocity = direction * speed
 		rotation = direction.angle()
