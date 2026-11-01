@@ -15,7 +15,7 @@ var status_label: Label
 var zone_label: Label
 var zone_ring: Node3D
 var zone_segments: Array[MeshInstance3D] = []
-var safe_zone_radius: float = 48.0
+var safe_zone_radius: float = 18.0
 var zone_elapsed: float = 0.0
 var zone_damage_elapsed: float = 0.0
 
@@ -422,12 +422,12 @@ func _create_player() -> void:
 
 func _create_bots() -> void:
 	var spawn_points: Array[Vector3] = [
-		Vector3(-27.0, 0.0, -22.0),
-		Vector3(-28.0, 0.0, 7.0),
-		Vector3(27.0, 0.0, -27.0),
-		Vector3(29.0, 0.0, 25.0),
-		Vector3(0.0, 0.0, -34.0),
-		Vector3(35.0, 0.0, 0.0)
+		Vector3(-27.0, 0.0, -11.0),
+		Vector3(-25.0, 0.0, 8.0),
+		Vector3(27.0, 0.0, -12.0),
+		Vector3(29.0, 0.0, 11.0),
+		Vector3(0.0, 0.0, -14.0),
+		Vector3(31.0, 0.0, 0.0)
 	]
 	for i in range(spawn_points.size()):
 		var bot = BOT_SCRIPT.new()
@@ -438,14 +438,14 @@ func _create_bots() -> void:
 
 func _create_loot() -> void:
 	_spawn_loot("ammo", 45, Vector3(7.0, 0.0, 4.0))
-	_spawn_loot("ammo", 45, Vector3(-8.0, 0.0, -3.0))
+	_spawn_loot("ammo", 45, Vector3(-8.0, 0.0, -5.0))
 	_spawn_loot("ammo", 60, Vector3(22.0, 0.0, 4.0))
 	_spawn_loot("medkit", 50, Vector3(-23.0, 0.0, 1.0))
-	_spawn_loot("medkit", 50, Vector3(3.0, 0.0, -25.0))
-	_spawn_loot("armor", 45, Vector3(12.0, 0.0, -12.0))
-	_spawn_loot("backpack", 1, Vector3(-15.0, 0.0, -8.0))
-	_spawn_loot("ammo", 60, Vector3(16.0, 0.0, 15.0))
-	_spawn_loot("medkit", 35, Vector3(-18.0, 0.0, 17.0))
+	_spawn_loot("medkit", 50, Vector3(3.0, 0.0, -12.0))
+	_spawn_loot("armor", 45, Vector3(12.0, 0.0, -10.0))
+	_spawn_loot("backpack", 1, Vector3(-15.0, 0.0, -7.0))
+	_spawn_loot("ammo", 60, Vector3(16.0, 0.0, 12.0))
+	_spawn_loot("medkit", 35, Vector3(-18.0, 0.0, 12.0))
 
 func _spawn_loot(kind: String, amount: int, spawn_position: Vector3) -> void:
 	var pickup = LOOT_SCRIPT.new()
