@@ -151,7 +151,15 @@ func _create_ground() -> void:
 	var material := _make_pbr_material("Grass004_2K-JPG", Color(0.78, 0.86, 0.72), Vector3(22.0, 22.0, 1.0))
 	mesh_instance.material_override = material
 	ground.add_child(mesh_instance)
-	var collisionfunc _create_complete_map() -> bool:
+	var collision := CollisionShape3D.new()
+	var shape := BoxShape3D.new()
+	shape.size = Vector3(MAP_SIZE, 0.3, MAP_SIZE)
+	collision.shape = shape
+	collision.position.y = -0.15
+	ground.add_child(collision)
+	add_child(ground)
+
+func _create_complete_map() -> bool:
 	var map_path := "res://assets/maps/free-fire-complete-map.glb"
 	var packed := load(map_path) as PackedScene
 	if packed == null:
@@ -189,12 +197,6 @@ func _sample_ground_height(x: float, z: float) -> float:
 
 func _ground_spawn_position(x: float, z: float) -> Vector3:
 	return Vector3(x, _sample_ground_height(x, z) + 0.18, z)
-
-_surface_count() > 0:
-			mesh_node.create_trimesh_collision()
-			collision_count += 1
-	print("Battle Royale map loaded: ", mesh_nodes.size(), " meshes; collision generated for ", collision_count)
-	return true
 
 func _create_map_features() -> void:
 	_spawn_city_building("building-type-a.glb", Vector3(12, 0, -12), Vector3(10.0, 5.5, 9.0), 0.0)
