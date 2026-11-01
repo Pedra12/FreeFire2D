@@ -47,7 +47,6 @@ fetch_pbr() {
 fetch_pbr Asphalt021_2K-JPG Asphalt021_2K-JPG
 fetch_pbr Grass004_2K-JPG Grass004_2K-JPG
 fetch_pbr Concrete012_2K-JPG Concrete012_2K-JPG
-fetch_pbr Bricks066_2K-JPG Bricks066_2K-JPG
 
 # CC0 flat-shaded firearms and real weapon audio from the FPS Asset Kit.
 mkdir -p prototype3d/assets/fps/weapons prototype3d/assets/fps/audio
