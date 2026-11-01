@@ -44,7 +44,7 @@ var weapon_base_position: Vector3 = Vector3.ZERO
 var weapon_base_rotation: Vector3 = Vector3.ZERO
 var shot_ray: RayCast3D
 var shot_audio: AudioStreamPlayer3D
-var gunshot_audio_stream: AudioStream
+var gunshot_audio_streams: Array[AudioStream] = []
 var sniper_audio_stream: AudioStream
 var footstep_audio: AudioStreamPlayer3D
 var footstep_timer: float = 0.0
@@ -477,9 +477,13 @@ func _build_audio_and_effects() -> void:
 	shot_audio.name = "GunshotAudio"
 	shot_audio.volume_db = -7.0
 	shot_audio.max_distance = 65.0
-	gunshot_audio_stream = load("res://assets/fps/audio/game_gunshot.wav") as AudioStream
-	sniper_audio_stream = load("res://assets/fps/audio/sniper_shot.wav") as AudioStream
-	shot_audio.stream = gunshot_audio_stream
+	for sound_file in ["impact-gunshot-16.mp3", "impact-gunshot-08.mp3", "impact-gunshot-09.mp3", "impact-gunshot-10.mp3"]:
+		var sound_stream := load("res://assets/fps/audio/" + sound_file) as AudioStream
+		if sound_stream != null:
+			gunshot_audio_streams.append(sound_stream)
+	sniper_audio_stream = load("res://assets/fps/audio/impact-gunshot-08.mp3") as AudioStream
+	if not gunshot_audio_streams.is_empty():
+		shot_audio.stream = gunshot_audio_streams[0]
 	add_child(shot_audio)
 
 	footstep_audio = AudioStreamPlayer3D.new()
@@ -511,7 +515,10 @@ func shoot() -> void:
 	if is_instance_valid(muzzle_light):
 		muzzle_light.visible = true
 	if is_instance_valid(shot_audio):
-		shot_audio.stream = sniper_audio_stream if weapon_index == 4 and sniper_audio_stream != null else gunshot_audio_stream
+		if weapon_index == 4 and sniper_audio_stream != null:
+			shot_audio.stream = sniper_audio_stream
+		elif not gunshot_audio_streams.is_empty():
+			shot_audio.stream = gunshot_audio_streams[randi_range(0, gunshot_audio_streams.size() - 1)]
 		shot_audio.pitch_scale = [0.96, 1.12, 0.82, 1.28, 0.92][weapon_index]
 		shot_audio.play()
 	ammo -= 1
