@@ -412,6 +412,9 @@ func _create_hud() -> void:
 	root.mouse_filter = Control.MOUSE_FILTER_PASS
 	hud_layer.add_child(root)
 	var screen := get_viewport().get_visible_rect().size
+	_add_hud_panel(root, Rect2(14.0, 8.0, 350.0, 152.0))
+	_add_hud_panel(root, Rect2(screen.x - 252.0, 8.0, 238.0, 92.0))
+	_add_hud_panel(root, Rect2(screen.x - 202.0, screen.y - 390.0, 188.0, 380.0))
 
 	var title := Label.new()
 	title.text = "SOBREVIVÊNCIA  |  BATTLE ROYALE 3D"
@@ -564,6 +567,22 @@ func _add_hold_button(root: Control, label_text: String, pos: Vector2, action: S
 	button.button_up.connect(func() -> void: Input.action_release(action))
 	_style_button(button)
 	root.add_child(button)
+
+
+func _add_hud_panel(root: Control, rect: Rect2) -> void:
+	var panel := Panel.new()
+	panel.position = rect.position
+	panel.size = rect.size
+	panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	var style := StyleBoxFlat.new()
+	style.bg_color = Color(0.018, 0.035, 0.045, 0.72)
+	style.border_color = Color(0.22, 0.48, 0.52, 0.78)
+	style.set_border_width_all(1)
+	style.set_corner_radius_all(12)
+	style.shadow_color = Color(0.0, 0.0, 0.0, 0.28)
+	style.shadow_size = 5
+	panel.add_theme_stylebox_override("panel", style)
+	root.add_child(panel)
 
 func _style_button(button: Button) -> void:
 	var normal := StyleBoxFlat.new()
