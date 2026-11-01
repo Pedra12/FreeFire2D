@@ -51,11 +51,11 @@ fetch_pbr Concrete012_2K-JPG Concrete012_2K-JPG
 # CC0 flat-shaded firearms and real weapon audio from the FPS Asset Kit.
 mkdir -p prototype3d/assets/fps/weapons prototype3d/assets/fps/audio
 FPS_BASE="https://raw.githubusercontent.com/petroulacl/fps-asset-kit/main"
-curl -fL --retry 3 "$FPS_BASE/weapons/flat_guns_west/GLB/Rifle_Assault_West.glb" -o prototype3d/assets/fps/weapons/rifle_assault.glb
-curl -fL --retry 3 "$FPS_BASE/weapons/flat_guns_west/GLB/Pistol_Full_West.glb" -o prototype3d/assets/fps/weapons/pistol_full.glb
-curl -fL --retry 3 "$FPS_BASE/weapons/flat_guns_west/GLB/Shotgun_Pump_West.glb" -o prototype3d/assets/fps/weapons/shotgun_pump.glb
-curl -fL --retry 3 "$FPS_BASE/weapons/flat_guns_west/GLB/SMG_Full_West.glb" -o prototype3d/assets/fps/weapons/smg_full.glb
-curl -fL --retry 3 "$FPS_BASE/weapons/flat_guns_west/GLB/Sniper_Rifle_West.glb" -o prototype3d/assets/fps/weapons/sniper_rifle.glb
+curl -fL --retry 3 "$FPS_BASE/weapons/flat_guns_west/Flat%20Guns%20West/GLB/Rifle_Assault_West.glb" -o prototype3d/assets/fps/weapons/rifle_assault.glb
+curl -fL --retry 3 "$FPS_BASE/weapons/flat_guns_west/Flat%20Guns%20West/GLB/Pistol_Full_West.glb" -o prototype3d/assets/fps/weapons/pistol_full.glb
+curl -fL --retry 3 "$FPS_BASE/weapons/flat_guns_west/Flat%20Guns%20West/GLB/Shotgun_Pump_West.glb" -o prototype3d/assets/fps/weapons/shotgun_pump.glb
+curl -fL --retry 3 "$FPS_BASE/weapons/flat_guns_west/Flat%20Guns%20West/GLB/SMG_Full_West.glb" -o prototype3d/assets/fps/weapons/smg_full.glb
+curl -fL --retry 3 "$FPS_BASE/weapons/flat_guns_west/Flat%20Guns%20West/GLB/Sniper_Rifle_West.glb" -o prototype3d/assets/fps/weapons/sniper_rifle.glb
 curl -fL --retry 3 "$FPS_BASE/sfx/footsteps/Fantozzi-footsteps/ogg/Fantozzi-StoneL1.ogg" -o prototype3d/assets/fps/audio/footstep_stone.ogg
 
 
