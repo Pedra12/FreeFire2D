@@ -49,5 +49,5 @@ func take_damage(amount: float) -> void:
 		defeated = true
 		var manager := get_parent().get_node_or_null("MatchManager")
 		if manager and manager.has_method("register_enemy_defeat"):
-			manager.register_enemy_defeat()
+			manager.call("register_enemy_defeat")
 		queue_free()
