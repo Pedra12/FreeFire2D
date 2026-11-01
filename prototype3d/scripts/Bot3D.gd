@@ -151,11 +151,21 @@ func _attach_bot_weapon() -> void:
 		return
 	firearm.name = "BotAssaultRifle"
 	firearm.scale = Vector3.ONE
-	var hand := character_model.find_child("Bip01 R Hand", true, false) as Node3D
-	if hand != null:
-		firearm.position = Vector3(0.0, -0.02, -0.10)
-		firearm.rotation = Vector3(0.0, PI, 0.0)
-		hand.add_child(firearm)
+	var skeletons := character_model.find_children("*", "Skeleton3D", true, false)
+	if not skeletons.is_empty():
+		var soldier_skeleton := skeletons[0] as Skeleton3D
+		if soldier_skeleton.find_bone("Bip01 R Hand") >= 0:
+			var attachment := BoneAttachment3D.new()
+			attachment.name = "WeaponAttachment"
+			attachment.bone_name = "Bip01 R Hand"
+			soldier_skeleton.add_child(attachment)
+			firearm.position = Vector3(0.0, 0.0, -0.08)
+			firearm.rotation = Vector3(0.0, PI, 0.0)
+			attachment.add_child(firearm)
+		else:
+			firearm.position = Vector3(0.38, 1.10, -0.48)
+			firearm.rotation = Vector3(0.0, PI, 0.0)
+			add_child(firearm)
 	else:
 		firearm.position = Vector3(0.38, 1.10, -0.48)
 		firearm.rotation = Vector3(0.0, PI, 0.0)
