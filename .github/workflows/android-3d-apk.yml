@@ -63,7 +63,7 @@ jobs:
       - name: Export Android APK
         run: |
           mkdir -p prototype3d/build
-          godot --headless --path prototype3d --export-debug "Android" prototype3d/build/FreeFire3D.apk
+          godot --headless --path prototype3d --export-debug "Android" build/FreeFire3D.apk
           test -s prototype3d/build/FreeFire3D.apk
 
       - name: Upload APK
