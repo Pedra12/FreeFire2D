@@ -141,8 +141,8 @@ func _create_building(pos: Vector3, size: Vector3, color: Color) -> void:
 	inside_material.albedo_color = color.darkened(0.22)
 	inside_material.roughness = 1.0
 	var wall_height := maxf(2.8, size.y - 0.3)
-	var wall_y := -size.y * 0.5 + 0.15 + wall_height * 0.5
-	_building_piece(building, Vector3(size.x, 0.3, size.z), Vector3(0.0, -size.y * 0.5 + 0.15, 0.0), inside_material)
+	var wall_y := -size.y * 0.5 + wall_height * 0.5
+	_building_piece(building, Vector3(size.x, 0.3, size.z), Vector3(0.0, -size.y * 0.5 - 0.08, 0.0), inside_material)
 	_building_piece(building, Vector3(size.x, wall_height, 0.24), Vector3(0.0, wall_y, size.z * 0.5 - 0.12), wall_material)
 	_building_piece(building, Vector3(0.24, wall_height, size.z), Vector3(-size.x * 0.5 + 0.12, wall_y, 0.0), wall_material)
 	_building_piece(building, Vector3(0.24, wall_height, size.z), Vector3(size.x * 0.5 - 0.12, wall_y, 0.0), wall_material)
@@ -150,7 +150,7 @@ func _create_building(pos: Vector3, size: Vector3, color: Color) -> void:
 	var side_width := (size.x - door_width) * 0.5
 	_building_piece(building, Vector3(side_width, wall_height, 0.24), Vector3(-size.x * 0.5 + side_width * 0.5, wall_y, -size.z * 0.5 + 0.12), wall_material)
 	_building_piece(building, Vector3(side_width, wall_height, 0.24), Vector3(size.x * 0.5 - side_width * 0.5, wall_y, -size.z * 0.5 + 0.12), wall_material)
-	_building_piece(building, Vector3(door_width, 0.55, 0.24), Vector3(0.0, -size.y * 0.5 + 0.15 + wall_height - 0.275, -size.z * 0.5 + 0.12), wall_material)
+	_building_piece(building, Vector3(door_width, 0.55, 0.24), Vector3(0.0, -size.y * 0.5 + 2.475, -size.z * 0.5 + 0.12), wall_material)
 
 	var glass := StandardMaterial3D.new()
 	glass.albedo_color = Color(0.10, 0.22, 0.29)
