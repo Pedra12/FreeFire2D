@@ -8,7 +8,7 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: read
+  contents: write
 
 jobs:
   inspect-convert:
@@ -57,17 +57,53 @@ jobs:
           import numpy
           print("NUMPY_VERSION:", numpy.__version__)
           bpy.ops.wm.open_mainfile(filepath=source)
-          # Record missing external textures; keep all images that are available.
+          # Replace missing external images with generated, packed fallback textures.
           missing = []
-          for image in bpy.data.images:
+          for image in list(bpy.data.images):
               if image.source == 'FILE':
                   path = bpy.path.abspath(image.filepath)
                   if not os.path.exists(path) and not image.packed_file:
-                      missing.append((image.name, image.filepath))
+                      missing.append((image, image.filepath))
+          import numpy as np
+          generated = []
+          size = 512
+          yy, xx = np.mgrid[0:size, 0:size]
+          for old_image, old_path in missing:
+              rng = np.random.default_rng(42 if 'Building' in old_image.name else 84)
+              noise = rng.normal(0.0, 0.035, (size, size))
+              if 'Building' in old_image.name:
+                  # Warm concrete facade with subtle repeated window panels.
+                  windows = ((xx % 96 > 22) & (xx % 96 < 72) & (yy % 128 > 28) & (yy % 128 < 96))
+                  pixels = np.zeros((size, size, 4), dtype=np.float32)
+                  base = 0.48 + noise
+                  pixels[..., 0] = np.where(windows, 0.12 + noise, base)
+                  pixels[..., 1] = np.where(windows, 0.16 + noise, base * 0.92)
+                  pixels[..., 2] = np.where(windows, 0.18 + noise, base * 0.80)
+              else:
+                  # Natural grass/earth top-view texture with soft color variation.
+                  patch = (np.sin(xx / 37.0) + np.cos(yy / 53.0) + np.sin((xx + yy) / 71.0)) / 6.0
+                  pixels = np.zeros((size, size, 4), dtype=np.float32)
+                  pixels[..., 0] = np.clip(0.20 + patch + noise, 0.05, 0.55)
+                  pixels[..., 1] = np.clip(0.34 + patch * 1.4 + noise, 0.10, 0.70)
+                  pixels[..., 2] = np.clip(0.13 + patch * 0.55 + noise, 0.04, 0.40)
+              pixels[..., 3] = 1.0
+              replacement = bpy.data.images.new(old_image.name + '_generated', width=size, height=size, alpha=True)
+              replacement.pixels.foreach_set(pixels.reshape(-1))
+              replacement.filepath_raw = os.path.abspath('output/' + replacement.name + '.png')
+              replacement.file_format = 'PNG'
+              replacement.save()
+              replacement.pack()
+              for material in bpy.data.materials:
+                  if material.use_nodes and material.node_tree:
+                      for node in material.node_tree.nodes:
+                          if node.type == 'TEX_IMAGE' and node.image == old_image:
+                              node.image = replacement
+              generated.append(replacement.name)
           with open("output/missing-textures.txt", "w") as report:
-              for name, path in missing:
-                  report.write(f"{name}: {path}\n")
-          print("MISSING_TEXTURES:", missing)
+              for image, path in missing:
+                  report.write(f"Replaced missing texture {image.name} ({path}) with generated fallback\n")
+              report.write("Generated textures: " + ", ".join(generated) + "\n")
+          print("MISSING_TEXTURES_REPLACED:", [x[0].name for x in missing])
           try:
               bpy.ops.file.pack_all()
           except Exception as exc:
@@ -84,6 +120,15 @@ jobs:
           BLEND_FILE="${{ steps.inspect.outputs.BLEND_FILE }}" blender -b --python /tmp/export_map.py 2>&1 | tee output/blender-conversion.log
           test -s output/free-fire-map.glb
           ls -lh output/free-fire-map.glb | tee -a output/inspection.txt
+          mkdir -p prototype3d/assets/maps
+          cp output/free-fire-map.glb prototype3d/assets/maps/free-fire-complete-map.glb
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add prototype3d/assets/maps/free-fire-complete-map.glb
+          if ! git diff --cached --quiet; then
+            git commit -m "Add converted complete Free Fire map"
+            git push
+          fi
 
       - name: Upload inspection and converted map
         if: always()
