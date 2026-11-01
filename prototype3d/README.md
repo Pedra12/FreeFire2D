@@ -3,19 +3,19 @@
 Projeto independente em Godot 4.3, orientado para Android em paisagem e jogabilidade 3D em terceira pessoa. A branch `main` e o protótipo 2D original permanecem preservados; todo o trabalho 3D fica nesta pasta e na branch `rebuild-3d`.
 
 ## Sistemas implementados
-- Personagem 3D com câmera em terceira pessoa, mira aproximada e controle por toque.
+- Personagens 3D importados do pacote Kenney Mini Characters, com seleção de animações quando disponíveis, câmera em terceira pessoa, mira aproximada e controle por toque.
 - Movimento, corrida, salto, recarga, disparo contínuo e poses procedurais de braços e pernas.
 - Quatro classes de arma: rifle, pistola, escopeta e submetralhadora, com dano, cadência e reservas independentes.
 - Colete com absorção de dano, mochila com aumento de reservas, kits médicos e caixas de munição.
 - Bots com perseguição, verificação de linha de visão, disparos, animação simples e queda ao serem eliminados.
 - Zona segura que diminui ao longo da partida e causa dano fora dos limites.
 - Construções com paredes segmentadas, entradas e espaços internos acessíveis.
-- Terreno, estradas, árvores, objetos de cenário e veículos estacionados.
+- Terreno, estradas, árvores, veículos, iluminação pública, placas e mobiliário interno com modelos 3D importados.
 - HUD com vida, colete, munição, inimigos restantes, zona segura e estado da partida.
 - Fluxos de CI separados para importar/testar o projeto 3D e exportar o APK Android.
 
 ## Limitações que continuam abertas
-Este é um protótipo jogável de sistemas, não um jogo completo nem uma cópia visual de Free Fire. Os personagens, armas, veículos, árvores e construções ainda são montados com malhas primitivas do Godot. As poses e quedas são animações procedurais simples, não animações profissionais capturadas ou rigadas.
+Este ainda é um protótipo de produção, não um jogo completo nem uma cópia visual de Free Fire. A cena agora integra modelos 3D CC0 da Kenney para personagens, carros, árvores, iluminação e mobiliário. O estilo desses recursos é low-poly/cartoon e ainda não corresponde ao visual militar mais realista de Free Fire. As armas de combate ainda precisam de modelos próprios adequados; alguns movimentos usam fallback procedural e a disponibilidade de clips varia por personagem.
 
 Ainda são necessários:
 - Modelos 3D externos de qualidade para personagens, armas, veículos e cenário, com rig, materiais e licenças compatíveis.
@@ -33,5 +33,8 @@ Ainda são necessários:
 4. Completar mapa, inventário, áudio e efeitos.
 5. Só então projetar multiplayer online com servidor autoritativo, sincronização, salas e proteção contra trapaças.
 
+## Assets e licenças
+Os modelos usados nesta etapa são do catálogo Kenney, publicados sob CC0 1.0. O pipeline baixa automaticamente os GLBs necessários de `Hidencod/tge-assets` antes de importar/exportar o projeto. Fonte dos modelos: https://github.com/Hidencod/tge-assets. Página e licença do autor: https://kenney.nl/support. Os arquivos baixados não ficam versionados no repositório; execute `.github/scripts/download-kenney-assets.sh` antes de abrir o projeto localmente.
+
 ## Abrir e exportar
-Importe esta pasta no Godot 4.3 pelo arquivo `project.godot`. O preset Android exporta para ARM64. A compilação Android precisa concluir o fluxo de CI e o APK precisa ser instalado e testado em aparelho real antes de ser considerado pronto.
+Importe esta pasta no Godot 4.3 pelo arquivo `project.godot`. Antes da importação local, execute `.github/scripts/download-kenney-assets.sh` na raiz do repositório. O preset Android exporta para ARM64. A compilação Android precisa concluir o fluxo de CI e o APK precisa ser instalado e testado em aparelho real antes de ser considerado pronto.
