@@ -139,6 +139,30 @@ func _create_building(pos: Vector3, size: Vector3, color: Color) -> void:
 	shape.size = size
 	collision.shape = shape
 	building.add_child(collision)
+
+	var glass := StandardMaterial3D.new()
+	glass.albedo_color = Color(0.12, 0.22, 0.28)
+	glass.metallic = 0.25
+	glass.roughness = 0.35
+	for floor_index in range(maxi(1, int(size.y / 2.0))):
+		for side in [-1, 1]:
+			var window := MeshInstance3D.new()
+			var window_mesh := BoxMesh.new()
+			window_mesh.size = Vector3(size.x * 0.19, 0.62, 0.07)
+			window.mesh = window_mesh
+			window.position = Vector3(float(side) * size.x * 0.25, -size.y * 0.5 + 1.35 + float(floor_index) * 1.5, -size.z * 0.5 - 0.045)
+			window.material_override = glass
+			building.add_child(window)
+
+	var roof_trim := MeshInstance3D.new()
+	var trim_mesh := BoxMesh.new()
+	trim_mesh.size = Vector3(size.x + 0.25, 0.16, size.z + 0.25)
+	roof_trim.mesh = trim_mesh
+	roof_trim.position.y = size.y * 0.5 + 0.06
+	var trim_material := StandardMaterial3D.new()
+	trim_material.albedo_color = color.darkened(0.18)
+	roof_trim.material_override = trim_material
+	building.add_child(roof_trim)
 	add_child(building)
 
 func _create_tree(pos: Vector3) -> void:
@@ -185,6 +209,27 @@ func _create_road(pos: Vector3, size: Vector3) -> void:
 	material.roughness = 1.0
 	road.material_override = material
 	add_child(road)
+	var stripe_material := StandardMaterial3D.new()
+	stripe_material.albedo_color = Color(0.82, 0.78, 0.58)
+	stripe_material.roughness = 1.0
+	if size.z > size.x:
+		for i in range(12):
+			var stripe := MeshInstance3D.new()
+			var stripe_mesh := BoxMesh.new()
+			stripe_mesh.size = Vector3(0.12, 0.035, 2.0)
+			stripe.mesh = stripe_mesh
+			stripe.position = pos + Vector3(0.0, 0.035, -size.z * 0.5 + 3.0 + float(i) * 6.0)
+			stripe.material_override = stripe_material
+			add_child(stripe)
+	else:
+		for i in range(12):
+			var stripe := MeshInstance3D.new()
+			var stripe_mesh := BoxMesh.new()
+			stripe_mesh.size = Vector3(2.0, 0.035, 0.12)
+			stripe.mesh = stripe_mesh
+			stripe.position = pos + Vector3(-size.x * 0.5 + 3.0 + float(i) * 6.0, 0.035, 0.0)
+			stripe.material_override = stripe_material
+			add_child(stripe)
 
 func _create_player() -> void:
 	player = PLAYER_SCRIPT.new()
