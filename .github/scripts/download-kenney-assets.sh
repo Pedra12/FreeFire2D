@@ -1,0 +1,114 @@
+#!/usr/bin/env bash
+set -euo pipefail
+set -x
+BASE="https://raw.githubusercontent.com/Hidencod/tge-assets/main/packs"
+OUT="prototype3d/assets/kenney"
+fetch() {
+  local pack="$1" file="$2"
+  mkdir -p "$OUT/$pack"
+  curl -fL --retry 3 --connect-timeout 20 "$BASE/$pack/$file" -o "$OUT/$pack/$file"
+}
+# Kenney CC0 environment assets: https://github.com/Hidencod/tge-assets
+# CodeLove military characters: MIT, license embedded in each GLB.
+mkdir -p prototype3d/assets/codelove
+curl -fL --retry 3 --connect-timeout 20 https://models.codelove.in/models/military-male-02.glb -o prototype3d/assets/codelove/military-male-02.glb
+curl -fL --retry 3 --connect-timeout 20 https://models.codelove.in/models/military-male-03.glb -o prototype3d/assets/codelove/military-male-03.glb
+curl -fL --retry 3 --connect-timeout 20 https://models.codelove.in/models/military-male-04.glb -o prototype3d/assets/codelove/military-male-04.glb
+mkdir -p prototype3d/assets/codelove/animations
+curl -fL --retry 3 --connect-timeout 20 https://models.codelove.in/animations/m_idle_neutral_01.glb -o prototype3d/assets/codelove/animations/m_idle_neutral_01.glb
+curl -fL --retry 3 --connect-timeout 20 https://models.codelove.in/animations/m_walk_neutral_01.glb -o prototype3d/assets/codelove/animations/m_walk_neutral_01.glb
+curl -fL --retry 3 --connect-timeout 20 https://models.codelove.in/animations/m_run_neutral_01.glb -o prototype3d/assets/codelove/animations/m_run_neutral_01.glb
+fetch car-kit suv.glb
+fetch car-kit police.glb
+fetch car-kit sedan-sports.glb
+fetch nature-kit tree-default.glb
+fetch nature-kit tree-palm.glb
+fetch nature-kit plant-bushlarge.glb
+fetch nature-kit rock-largea.glb
+fetch city-kit-roads light-curved.glb
+fetch city-kit-roads dumpster.glb
+fetch city-kit-roads road-sign-street.glb
+fetch furniture-kit beddouble.glb
+fetch furniture-kit chair.glb
+fetch furniture-kit desk.glb
+fetch furniture-kit table.glb
+fetch furniture-kit cardboardboxclosed.glb
+fetch furniture-kit loungesofa.glb
+
+# CC0 Kenney City Kit Suburban building models and props.
+CITY_BASE="https://raw.githubusercontent.com/petroulacl/fps-buildings-env-kit/1dd8e932402deb82422920df2e7fd079391e55d3/buildings/kenney-city-kit-suburban/Models/GLB%20format"
+CITY_OUT="prototype3d/assets/kenney/city-kit-suburban"
+mkdir -p "$CITY_OUT/Textures"
+for model in building-type-a building-type-b building-type-c building-type-d fence-1x3 fence-1x4 planter driveway-long path-stones-messy; do
+  curl -fL --retry 3 --connect-timeout 20 "$CITY_BASE/$model.glb" -o "$CITY_OUT/$model.glb"
+done
+curl -fL --retry 3 --connect-timeout 20 "$CITY_BASE/Textures/colormap.png" -o "$CITY_OUT/Textures/colormap.png"
+
+# CC0 PBR surface maps from ambientCG, mirrored in the FPS Buildings Environment Kit.
+PBR_BASE="https://raw.githubusercontent.com/petroulacl/fps-buildings-env-kit/1dd8e932402deb82422920df2e7fd079391e55d3/environment/ground-textures/ambientcg"
+fetch_pbr() {
+  local pack="$1" prefix="$2"
+  local dir="prototype3d/assets/pbr/$pack"
+  mkdir -p "$dir"
+  for map in Color NormalGL Roughness; do
+    curl -fL --retry 3 --connect-timeout 20 "$PBR_BASE/$pack/${prefix}_$map.jpg" -o "$dir/${prefix}_$map.jpg"
+  done
+}
+fetch_pbr Asphalt021_2K-JPG Asphalt021_2K-JPG
+fetch_pbr Grass004_2K-JPG Grass004_2K-JPG
+fetch_pbr Concrete012_2K-JPG Concrete012_2K-JPG
+
+
+# CC0 Battle Royale Town and Airfield: complete preassembled modern combat map.
+# 83 production-ready GLB pieces, including modular buildings, hangar, airfield,
+# loot props, vehicles and environmental dressing. Starter scene is a single GLB.
+mkdir -p prototype3d/assets/battle_royale
+curl -fL --retry 3 --connect-timeout 20 \
+  https://cdn.3dassets.dev/assets/28276/v1/model.glb \
+  -o prototype3d/assets/battle_royale/town_airfield.glb
+python3 - <<'PY'
+from pathlib import Path
+p = Path("prototype3d/assets/battle_royale/town_airfield.glb")
+data = p.read_bytes()
+assert data[:4] == b"glTF" and len(data) > 1_000_000, "Invalid Battle Royale map GLB"
+print(f"Verified Battle Royale map: {len(data):,} bytes")
+PY
+
+# CC0 flat-shaded firearms and real weapon audio from the FPS Asset Kit.
+mkdir -p prototype3d/assets/fps/weapons prototype3d/assets/fps/audio
+FPS_BASE="https://raw.githubusercontent.com/petroulacl/fps-asset-kit/main"
+curl -fL --retry 3 "$FPS_BASE/weapons/flat_guns_west/Flat%20Guns%20West/GLB/Rifle_Assault_West.glb" -o prototype3d/assets/fps/weapons/rifle_assault.glb
+curl -fL --retry 3 "$FPS_BASE/weapons/flat_guns_west/Flat%20Guns%20West/GLB/Pistol_Full_West.glb" -o prototype3d/assets/fps/weapons/pistol_full.glb
+curl -fL --retry 3 "$FPS_BASE/weapons/flat_guns_west/Flat%20Guns%20West/GLB/Shotgun_Pump_West.glb" -o prototype3d/assets/fps/weapons/shotgun_pump.glb
+curl -fL --retry 3 "$FPS_BASE/weapons/flat_guns_west/Flat%20Guns%20West/GLB/SMG_Full_West.glb" -o prototype3d/assets/fps/weapons/smg_full.glb
+curl -fL --retry 3 "$FPS_BASE/weapons/flat_guns_west/Flat%20Guns%20West/GLB/Sniper_Rifle_West.glb" -o prototype3d/assets/fps/weapons/sniper_rifle.glb
+curl -fL --retry 3 "$FPS_BASE/sfx/footsteps/Fantozzi-footsteps/ogg/Fantozzi-StoneL1.ogg" -o prototype3d/assets/fps/audio/footstep_stone.ogg
+# CC0 gunfire sounds from SFXMint; verify real MPEG audio, not an HTML response.
+for sound in impact-gunshot-16 impact-gunshot-08 impact-gunshot-09 impact-gunshot-10; do
+  curl -fL --retry 3 --connect-timeout 20 "https://sfxmint.com/dl/$sound.mp3" -o "prototype3d/assets/fps/audio/$sound.mp3"
+done
+python3 - <<'PY'
+from pathlib import Path
+for path in Path("prototype3d/assets/fps/audio").glob("impact-gunshot-*.mp3"):
+    data = path.read_bytes()
+    valid = data.startswith(b"ID3") or (len(data) > 2 and data[0] == 0xFF and data[1] & 0xE0 == 0xE0)
+    assert valid and len(data) > 4096, f"Invalid MP3 download: {path}"
+    print(f"Verified MP3: {path} ({len(data)} bytes)")
+PY
+
+
+
+# Godot 4.3 does not support EXT_meshopt_compression / KHR_mesh_quantization.
+# Repack character, animation and Battle Royale map GLBs as plain glTF-compatible files,
+# preserving skeletons, node names, materials and textures.
+TMP_DIR="$(mktemp -d)"
+git clone --depth 1 https://github.com/zeux/meshoptimizer.git "$TMP_DIR/meshoptimizer"
+cmake -S "$TMP_DIR/meshoptimizer" -B "$TMP_DIR/build" -DMESHOPT_BUILD_GLTFPACK=ON -DCMAKE_BUILD_TYPE=Release
+cmake --build "$TMP_DIR/build" --target gltfpack --parallel 2
+while IFS= read -r model; do
+  converted="${model%.glb}.godot.glb"
+  "$TMP_DIR/build/gltfpack" -i "$model" -o "$converted" -noq -kn -km -ke
+  mv "$converted" "$model"
+done < <(find prototype3d/assets/codelove prototype3d/assets/battle_royale -type f -name "*.glb" -print)
+rm -rf "$TMP_DIR"
+

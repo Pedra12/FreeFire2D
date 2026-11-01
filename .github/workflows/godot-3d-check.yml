@@ -1,0 +1,52 @@
+name: Godot 3D Prototype Check
+
+on:
+  push:
+    branches: [rebuild-3d]
+    paths:
+      - "prototype3d/**"
+      - ".github/scripts/**"
+      - ".github/workflows/godot-3d-check.yml"
+  pull_request:
+    paths:
+      - "prototype3d/**"
+      - ".github/workflows/godot-3d-check.yml"
+  workflow_dispatch:
+
+jobs:
+  validate-3d:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Download CC0 3D asset pack
+        run: bash .github/scripts/download-kenney-assets.sh
+
+      - name: Install Godot 4.3
+        uses: chickensoft-games/setup-godot@v1
+        with:
+          version: 4.3.0
+          use-dotnet: false
+          include-templates: false
+
+      - name: Import and parse the 3D project
+        shell: bash
+        run: |
+          set -o pipefail
+          godot --headless --editor --path prototype3d --quit 2>&1 | tee /tmp/godot-import.log
+          if grep -E "SCRIPT ERROR:|Parse Error:|Compile Error:|Failed to load script" /tmp/godot-import.log; then
+            exit 1
+          fi
+
+      - name: Install virtual display for 3D runtime test
+        run: sudo apt-get update && sudo apt-get install -y xvfb libgl1-mesa-dri
+
+      - name: Run the 3D scene for 120 frames
+        shell: bash
+        run: |
+          set -o pipefail
+          xvfb-run -a godot --path prototype3d --rendering-method gl_compatibility --audio-driver Dummy --quit-after 120 2>&1 | tee /tmp/godot-run.log
+          if grep -E "SCRIPT ERROR:|Parse Error:|Compile Error:|ERROR:" /tmp/godot-run.log; then
+            exit 1
+          fi
