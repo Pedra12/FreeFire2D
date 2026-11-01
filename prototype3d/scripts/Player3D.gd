@@ -40,6 +40,9 @@ var spring_arm: SpringArm3D
 var camera: Camera3D
 var weapon: MeshInstance3D
 var shot_ray: RayCast3D
+var shot_audio: AudioStreamPlayer3D
+var muzzle_light: OmniLight3D
+var muzzle_timer: float = 0.0
 var left_leg_pivot: Node3D
 var right_leg_pivot: Node3D
 var left_arm_pivot: Node3D
@@ -54,6 +57,7 @@ func _ready() -> void:
 	_build_collision()
 	_build_character()
 	_build_camera()
+	_build_audio_and_effects()
 	stats_changed.emit()
 
 func _physics_process(delta: float) -> void:
@@ -88,6 +92,9 @@ func _physics_process(delta: float) -> void:
 			right_leg_pivot.rotation.x = move_toward(right_leg_pivot.rotation.x, 0.0, delta * 3.0)
 	fire_cooldown = maxf(0.0, fire_cooldown - delta)
 	recoil_amount = move_toward(recoil_amount, 0.0, delta * 3.5)
+	muzzle_timer = maxf(0.0, muzzle_timer - delta)
+	if is_instance_valid(muzzle_light):
+		muzzle_light.visible = muzzle_timer > 0.0
 	if is_instance_valid(right_arm_pivot):
 		var pose := -0.75 if is_aiming else -0.48
 		if is_reloading:
@@ -249,6 +256,39 @@ func _build_camera() -> void:
 	camera.add_child(shot_ray)
 	shot_ray.add_exception(self)
 
+
+func _build_audio_and_effects() -> void:
+	shot_audio = AudioStreamPlayer3D.new()
+	shot_audio.name = "ProceduralGunshot"
+	shot_audio.volume_db = -8.0
+	shot_audio.max_distance = 55.0
+	var sample_rate := 22050
+	var sample_count := 3308
+	var samples := PackedByteArray()
+	samples.resize(sample_count * 2)
+	for i in range(sample_count):
+		var time := float(i) / float(sample_rate)
+		var envelope := exp(-time * 42.0)
+		var noise := sin(float(i) * 12.9898) * 0.18
+		var wave := (sin(TAU * 105.0 * time) * 0.72 + noise) * envelope
+		samples.encode_s16(i * 2, int(clampf(wave, -1.0, 1.0) * 30000.0))
+	var sound := AudioStreamWAV.new()
+	sound.format = AudioStreamWAV.FORMAT_16_BITS
+	sound.mix_rate = sample_rate
+	sound.stereo = false
+	sound.data = samples
+	shot_audio.stream = sound
+	add_child(shot_audio)
+
+	muzzle_light = OmniLight3D.new()
+	muzzle_light.name = "MuzzleFlash"
+	muzzle_light.light_color = Color(1.0, 0.72, 0.32)
+	muzzle_light.light_energy = 2.2
+	muzzle_light.omni_range = 3.5
+	muzzle_light.position = Vector3(0.39, 1.25, -0.95)
+	muzzle_light.visible = false
+	add_child(muzzle_light)
+
 func shoot() -> void:
 	if fire_cooldown > 0.0 or is_reloading or ammo <= 0:
 		if ammo <= 0 and not is_reloading:
@@ -256,6 +296,12 @@ func shoot() -> void:
 		return
 	fire_cooldown = weapon_fire_interval
 	recoil_amount = 0.22 if weapon_index == 2 else 0.12
+	muzzle_timer = 0.055
+	if is_instance_valid(muzzle_light):
+		muzzle_light.visible = true
+	if is_instance_valid(shot_audio):
+		shot_audio.pitch_scale = [1.0, 1.25, 0.72, 1.45][weapon_index]
+		shot_audio.play()
 	ammo -= 1
 	weapon_magazines[weapon_index] = ammo
 	if is_instance_valid(shot_ray):
