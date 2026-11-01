@@ -31,7 +31,7 @@ func _ready() -> void:
 func _process(delta: float) -> void:
 	if not is_instance_valid(player):
 		return
-	health_label.text = "VIDA  %d / %d" % [roundi(player.health), roundi(player.max_health)]
+	health_label.text = "VIDA  %d / %d   COLETE  %d" % [roundi(player.health), roundi(player.max_health), roundi(player.armor_points)]
 	health_bar.max_value = player.max_health
 	health_bar.value = player.health
 	ammo_label.text = "%s  |  MUNIÇÃO  %d / %d" % [player.weapon_name, player.ammo, player.reserve_ammo]
@@ -132,45 +132,69 @@ func _create_map_features() -> void:
 func _create_building(pos: Vector3, size: Vector3, color: Color) -> void:
 	var building := StaticBody3D.new()
 	building.position = pos + Vector3(0.0, size.y * 0.5, 0.0)
-	var mesh_instance := MeshInstance3D.new()
-	var mesh := BoxMesh.new()
-	mesh.size = size
-	mesh_instance.mesh = mesh
-	var material := StandardMaterial3D.new()
-	material.albedo_color = color
-	material.roughness = 0.9
-	mesh_instance.material_override = material
-	building.add_child(mesh_instance)
-	var collision := CollisionShape3D.new()
-	var shape := BoxShape3D.new()
-	shape.size = size
-	collision.shape = shape
-	building.add_child(collision)
+	var wall_material := StandardMaterial3D.new()
+	wall_material.albedo_color = color
+	wall_material.roughness = 0.92
+	var inside_material := StandardMaterial3D.new()
+	inside_material.albedo_color = color.darkened(0.22)
+	inside_material.roughness = 1.0
+	var wall_height := maxf(2.8, size.y - 0.3)
+	var wall_y := -size.y * 0.5 + 0.15 + wall_height * 0.5
+	_building_piece(building, Vector3(size.x, 0.3, size.z), Vector3(0.0, -size.y * 0.5 + 0.15, 0.0), inside_material)
+	_building_piece(building, Vector3(size.x, wall_height, 0.24), Vector3(0.0, wall_y, size.z * 0.5 - 0.12), wall_material)
+	_building_piece(building, Vector3(0.24, wall_height, size.z), Vector3(-size.x * 0.5 + 0.12, wall_y, 0.0), wall_material)
+	_building_piece(building, Vector3(0.24, wall_height, size.z), Vector3(size.x * 0.5 - 0.12, wall_y, 0.0), wall_material)
+	var door_width := 1.8
+	var side_width := (size.x - door_width) * 0.5
+	_building_piece(building, Vector3(side_width, wall_height, 0.24), Vector3(-size.x * 0.5 + side_width * 0.5, wall_y, -size.z * 0.5 + 0.12), wall_material)
+	_building_piece(building, Vector3(side_width, wall_height, 0.24), Vector3(size.x * 0.5 - side_width * 0.5, wall_y, -size.z * 0.5 + 0.12), wall_material)
+	_building_piece(building, Vector3(door_width, 0.55, 0.24), Vector3(0.0, -size.y * 0.5 + 0.15 + wall_height - 0.275, -size.z * 0.5 + 0.12), wall_material)
 
 	var glass := StandardMaterial3D.new()
-	glass.albedo_color = Color(0.12, 0.22, 0.28)
-	glass.metallic = 0.25
-	glass.roughness = 0.35
-	for floor_index in range(maxi(1, int(size.y / 2.0))):
-		for side in [-1, 1]:
-			var window := MeshInstance3D.new()
-			var window_mesh := BoxMesh.new()
-			window_mesh.size = Vector3(size.x * 0.19, 0.62, 0.07)
-			window.mesh = window_mesh
-			window.position = Vector3(float(side) * size.x * 0.25, -size.y * 0.5 + 1.35 + float(floor_index) * 1.5, -size.z * 0.5 - 0.045)
-			window.material_override = glass
-			building.add_child(window)
+	glass.albedo_color = Color(0.10, 0.22, 0.29)
+	glass.metallic = 0.3
+	glass.roughness = 0.28
+	for side in [-1, 1]:
+		var window := MeshInstance3D.new()
+		var window_mesh := BoxMesh.new()
+		window_mesh.size = Vector3(1.0, 0.85, 0.06)
+		window.mesh = window_mesh
+		window.position = Vector3(float(side) * size.x * 0.27, 0.25, -size.z * 0.5 - 0.015)
+		window.material_override = glass
+		building.add_child(window)
 
-	var roof_trim := MeshInstance3D.new()
-	var trim_mesh := BoxMesh.new()
-	trim_mesh.size = Vector3(size.x + 0.25, 0.16, size.z + 0.25)
-	roof_trim.mesh = trim_mesh
-	roof_trim.position.y = size.y * 0.5 + 0.06
-	var trim_material := StandardMaterial3D.new()
-	trim_material.albedo_color = color.darkened(0.18)
-	roof_trim.material_override = trim_material
-	building.add_child(roof_trim)
+	var roof_material := StandardMaterial3D.new()
+	roof_material.albedo_color = color.darkened(0.2)
+	_building_piece(building, Vector3(size.x + 0.25, 0.18, 0.28), Vector3(0.0, size.y * 0.5 - 0.08, size.z * 0.5), roof_material)
+	_building_piece(building, Vector3(size.x + 0.25, 0.18, 0.28), Vector3(0.0, size.y * 0.5 - 0.08, -size.z * 0.5), roof_material)
+	_building_piece(building, Vector3(0.28, 0.18, size.z), Vector3(size.x * 0.5, size.y * 0.5 - 0.08, 0.0), roof_material)
+	_building_piece(building, Vector3(0.28, 0.18, size.z), Vector3(-size.x * 0.5, size.y * 0.5 - 0.08, 0.0), roof_material)
+
+	var crate := MeshInstance3D.new()
+	var crate_mesh := BoxMesh.new()
+	crate_mesh.size = Vector3(0.9, 0.8, 0.9)
+	crate.mesh = crate_mesh
+	crate.position = Vector3(size.x * 0.22, -size.y * 0.5 + 0.55, size.z * 0.12)
+	var crate_material := StandardMaterial3D.new()
+	crate_material.albedo_color = Color(0.32, 0.24, 0.14)
+	crate.material_override = crate_material
+	building.add_child(crate)
 	add_child(building)
+
+func _building_piece(parent: StaticBody3D, piece_size: Vector3, piece_position: Vector3, material: Material) -> void:
+	var visual := MeshInstance3D.new()
+	var mesh := BoxMesh.new()
+	mesh.size = piece_size
+	visual.mesh = mesh
+	visual.position = piece_position
+	visual.material_override = material
+	parent.add_child(visual)
+	var collision := CollisionShape3D.new()
+	var shape := BoxShape3D.new()
+	shape.size = piece_size
+	collision.shape = shape
+	collision.position = piece_position
+	parent.add_child(collision)
 
 func _create_tree(pos: Vector3) -> void:
 	var tree := StaticBody3D.new()
@@ -266,6 +290,10 @@ func _create_loot() -> void:
 	_spawn_loot("ammo", 60, Vector3(22.0, 0.0, 4.0))
 	_spawn_loot("medkit", 50, Vector3(-23.0, 0.0, 1.0))
 	_spawn_loot("medkit", 50, Vector3(3.0, 0.0, -25.0))
+	_spawn_loot("armor", 45, Vector3(12.0, 0.0, -12.0))
+	_spawn_loot("backpack", 1, Vector3(-15.0, 0.0, -8.0))
+	_spawn_loot("ammo", 60, Vector3(16.0, 0.0, 15.0))
+	_spawn_loot("medkit", 35, Vector3(-18.0, 0.0, 17.0))
 
 func _spawn_loot(kind: String, amount: int, spawn_position: Vector3) -> void:
 	var pickup = LOOT_SCRIPT.new()
