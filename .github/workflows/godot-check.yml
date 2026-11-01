@@ -27,5 +27,14 @@ jobs:
       - name: Import and parse 3D project
         run: godot --headless --editor --path prototype3d --quit
 
+      - name: Install virtual display for 3D runtime test
+        run: sudo apt-get update && sudo apt-get install -y xvfb libgl1-mesa-dri
+
       - name: Run 3D scene for 120 frames
-        run: godot --headless --path prototype3d --quit-after 120
+        shell: bash
+        run: |
+          set -o pipefail
+          xvfb-run -a godot --path prototype3d --rendering-method gl_compatibility --quit-after 120 2>&1 | tee /tmp/godot-3d-run.log
+          if grep -E "SCRIPT ERROR:|Parse Error:|Compile Error:|ERROR:" /tmp/godot-3d-run.log; then
+            exit 1
+          fi
