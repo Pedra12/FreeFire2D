@@ -2,6 +2,11 @@ name: FreeFire 3D Android APK
 
 on:
   workflow_dispatch:
+  pull_request:
+    branches: [main]
+    paths:
+      - "prototype3d/**"
+      - ".github/workflows/android-3d-apk.yml"
   push:
     branches: [rebuild-3d]
     paths:
