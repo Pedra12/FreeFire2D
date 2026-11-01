@@ -34,6 +34,17 @@ fetch furniture-kit table.glb
 fetch furniture-kit cardboardboxclosed.glb
 fetch furniture-kit loungesofa.glb
 
+# CC0 flat-shaded firearms and real weapon audio from the FPS Asset Kit.
+mkdir -p prototype3d/assets/fps/weapons prototype3d/assets/fps/audio
+FPS_BASE="https://raw.githubusercontent.com/petroulacl/fps-asset-kit/main"
+curl -fL --retry 3 "$FPS_BASE/weapons/flat_guns_west/Flat%20Guns%20West/GLB/Rifle_Assault_West.glb" -o prototype3d/assets/fps/weapons/rifle_assault.glb
+curl -fL --retry 3 "$FPS_BASE/weapons/flat_guns_west/Flat%20Guns%20West/GLB/Pistol_Full_West.glb" -o prototype3d/assets/fps/weapons/pistol_full.glb
+curl -fL --retry 3 "$FPS_BASE/weapons/flat_guns_west/Flat%20Guns%20West/GLB/Shotgun_Pump_West.glb" -o prototype3d/assets/fps/weapons/shotgun_pump.glb
+curl -fL --retry 3 "$FPS_BASE/weapons/flat_guns_west/Flat%20Guns%20West/GLB/SMG_Full_West.glb" -o prototype3d/assets/fps/weapons/smg_full.glb
+curl -fL --retry 3 "$FPS_BASE/weapons/flat_guns_west/Flat%20Guns%20West/GLB/Sniper_Rifle_West.glb" -o prototype3d/assets/fps/weapons/sniper_rifle.glb
+curl -fL --retry 3 "$FPS_BASE/sfx/gunshots/game_gunshot.wav" -o prototype3d/assets/fps/audio/game_gunshot.wav
+
+
 
 # Godot 4.3 does not support EXT_meshopt_compression / KHR_mesh_quantization.
 # Repack military GLBs as plain glTF-compatible files while keeping rig, names and materials.
