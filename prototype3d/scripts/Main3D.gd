@@ -406,168 +406,143 @@ func _spawn_loot(kind: String, amount: int, spawn_position: Vector3) -> void:
 
 func _create_hud() -> void:
 	hud_layer = CanvasLayer.new()
+	hud_layer.layer = 10
 	add_child(hud_layer)
 	var root := Control.new()
 	root.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	root.mouse_filter = Control.MOUSE_FILTER_PASS
 	hud_layer.add_child(root)
 	var screen := get_viewport().get_visible_rect().size
-	_add_hud_panel(root, Rect2(14.0, 8.0, 350.0, 152.0))
-	_add_hud_panel(root, Rect2(screen.x - 252.0, 8.0, 238.0, 92.0))
-	_add_hud_panel(root, Rect2(screen.x - 202.0, screen.y - 390.0, 188.0, 380.0))
+
+	for action in ["move_left", "move_right", "move_forward", "move_back", "jump", "sprint"]:
+		if not InputMap.has_action(action):
+			InputMap.add_action(action)
+
+	_add_hud_panel(root, Rect2(18.0, 14.0, 310.0, 112.0))
+	_add_hud_panel(root, Rect2(screen.x - 230.0, 14.0, 212.0, 82.0))
 
 	var title := Label.new()
-	title.text = "SOBREVIVÊNCIA  |  BATTLE ROYALE 3D"
-	title.position = Vector2(24.0, 16.0)
-	title.size = Vector2(600.0, 34.0)
-	title.add_theme_font_size_override("font_size", 22)
+	title.text = "BATTLE ROYALE"
+	title.position = Vector2(30.0, 18.0)
+	title.size = Vector2(270.0, 24.0)
+	title.add_theme_font_size_override("font_size", 16)
+	title.add_theme_color_override("font_color", Color(0.88, 0.91, 0.86))
 	root.add_child(title)
 
 	health_label = Label.new()
-	health_label.position = Vector2(24.0, 55.0)
-	health_label.size = Vector2(250.0, 30.0)
-	health_label.add_theme_font_size_override("font_size", 19)
+	health_label.position = Vector2(30.0, 43.0)
+	health_label.size = Vector2(280.0, 24.0)
+	health_label.add_theme_font_size_override("font_size", 16)
 	root.add_child(health_label)
 
 	health_bar = ProgressBar.new()
-	health_bar.position = Vector2(24.0, 84.0)
-	health_bar.size = Vector2(250.0, 14.0)
+	health_bar.position = Vector2(30.0, 70.0)
+	health_bar.size = Vector2(270.0, 12.0)
 	health_bar.min_value = 0.0
 	health_bar.max_value = player.max_health
 	health_bar.value = player.health
 	health_bar.show_percentage = false
 	var health_background := StyleBoxFlat.new()
-	health_background.bg_color = Color(0.04, 0.05, 0.05, 0.88)
-	health_background.set_corner_radius_all(5)
+	health_background.bg_color = Color(0.04, 0.05, 0.05, 0.9)
+	health_background.set_corner_radius_all(6)
 	var health_fill := StyleBoxFlat.new()
-	health_fill.bg_color = Color(0.16, 0.72, 0.32, 0.98)
-	health_fill.set_corner_radius_all(5)
+	health_fill.bg_color = Color(0.20, 0.78, 0.34, 1.0)
+	health_fill.set_corner_radius_all(6)
 	health_bar.add_theme_stylebox_override("background", health_background)
 	health_bar.add_theme_stylebox_override("fill", health_fill)
 	root.add_child(health_bar)
 
 	ammo_label = Label.new()
-	ammo_label.position = Vector2(24.0, 106.0)
-	ammo_label.size = Vector2(300.0, 30.0)
-	ammo_label.add_theme_font_size_override("font_size", 19)
+	ammo_label.position = Vector2(screen.x - 220.0, screen.y - 62.0)
+	ammo_label.size = Vector2(205.0, 42.0)
+	ammo_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
+	ammo_label.add_theme_font_size_override("font_size", 17)
 	root.add_child(ammo_label)
 
 	enemies_label = Label.new()
-	enemies_label.position = Vector2(screen.x - 230.0, 20.0)
-	enemies_label.size = Vector2(210.0, 34.0)
+	enemies_label.position = Vector2(screen.x - 215.0, 23.0)
+	enemies_label.size = Vector2(190.0, 28.0)
 	enemies_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
-	enemies_label.add_theme_font_size_override("font_size", 19)
+	enemies_label.add_theme_font_size_override("font_size", 17)
 	root.add_child(enemies_label)
 
 	zone_label = Label.new()
-	zone_label.position = Vector2(screen.x - 230.0, 54.0)
-	zone_label.size = Vector2(210.0, 30.0)
+	zone_label.position = Vector2(screen.x - 215.0, 54.0)
+	zone_label.size = Vector2(190.0, 25.0)
 	zone_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
-	zone_label.add_theme_font_size_override("font_size", 17)
+	zone_label.add_theme_font_size_override("font_size", 14)
 	root.add_child(zone_label)
 
 	status_label = Label.new()
 	status_label.text = "ELIMINE OS BOTS E COLETE SUPRIMENTOS"
-	status_label.position = Vector2(24.0, 124.0)
-	status_label.size = Vector2(550.0, 28.0)
-	status_label.add_theme_font_size_override("font_size", 15)
+	status_label.position = Vector2(screen.x * 0.5 - 220.0, 18.0)
+	status_label.size = Vector2(440.0, 28.0)
+	status_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	status_label.add_theme_font_size_override("font_size", 14)
 	root.add_child(status_label)
 
 	var crosshair := Label.new()
-	crosshair.text = "+"
-	crosshair.position = screen * 0.5 - Vector2(10.0, 20.0)
-	crosshair.size = Vector2(24.0, 40.0)
-	crosshair.add_theme_font_size_override("font_size", 30)
+	crosshair.text = "·"
+	crosshair.position = screen * 0.5 - Vector2(5.0, 15.0)
+	crosshair.size = Vector2(12.0, 24.0)
+	crosshair.add_theme_font_size_override("font_size", 28)
+	crosshair.add_theme_color_override("font_color", Color(1.0, 0.96, 0.82, 0.95))
 	root.add_child(crosshair)
 
-	_add_hold_button(root, "▲", Vector2(105.0, screen.y - 218.0), "move_forward")
-	_add_hold_button(root, "▼", Vector2(105.0, screen.y - 90.0), "move_back")
-	_add_hold_button(root, "◀", Vector2(38.0, screen.y - 154.0), "move_left")
-	_add_hold_button(root, "▶", Vector2(172.0, screen.y - 154.0), "move_right")
+	var joystick = preload("res://scripts/VirtualJoystick.gd").new()
+	joystick.name = "MovementJoystick"
+	joystick.position = Vector2(34.0, screen.y - 204.0)
+	joystick.custom_minimum_size = Vector2(176.0, 176.0)
+	joystick.size = Vector2(176.0, 176.0)
+	joystick.value_changed.connect(player.set_mobile_move_vector)
+	root.add_child(joystick)
 
+	_add_touch_button(root, "CORRER", Vector2(62.0, screen.y - 270.0), Vector2(112.0, 44.0), "sprint")
+	_add_touch_button(root, "ATIRAR", Vector2(screen.x - 154.0, screen.y - 176.0), Vector2(112.0, 112.0), "fire")
+	_add_touch_button(root, "MIRA", Vector2(screen.x - 270.0, screen.y - 112.0), Vector2(76.0, 76.0), "aim")
+	_add_touch_button(root, "PULAR", Vector2(screen.x - 104.0, screen.y - 302.0), Vector2(78.0, 78.0), "jump")
+	_add_touch_button(root, "REC", Vector2(screen.x - 252.0, screen.y - 260.0), Vector2(68.0, 68.0), "reload")
+	_add_touch_button(root, "ARMA", Vector2(screen.x - 164.0, screen.y - 350.0), Vector2(68.0, 68.0), "switch")
 
-	if not InputMap.has_action("jump"):
-		InputMap.add_action("jump")
-	var jump_button := Button.new()
-	jump_button.text = "PULAR"
-	jump_button.position = Vector2(screen.x - 300.0, screen.y - 145.0)
-	jump_button.custom_minimum_size = Vector2(100.0, 86.0)
-	jump_button.size = Vector2(100.0, 86.0)
-	jump_button.add_theme_font_size_override("font_size", 17)
-	jump_button.button_down.connect(func() -> void: Input.action_press("jump"))
-	jump_button.button_up.connect(func() -> void: Input.action_release("jump"))
-	_style_button(jump_button)
-	root.add_child(jump_button)
-
-	var fire := Button.new()
-	fire.text = "ATIRAR"
-	fire.position = Vector2(screen.x - 180.0, screen.y - 150.0)
-	fire.custom_minimum_size = Vector2(145.0, 115.0)
-	fire.size = Vector2(145.0, 115.0)
-	fire.add_theme_font_size_override("font_size", 22)
-	fire.button_down.connect(player.set_firing.bind(true))
-	fire.button_up.connect(player.set_firing.bind(false))
-	_style_button(fire)
-	root.add_child(fire)
-
-	var weapon_button := Button.new()
-	weapon_button.text = "TROCAR ARMA"
-	weapon_button.position = Vector2(screen.x - 180.0, screen.y - 365.0)
-	weapon_button.custom_minimum_size = Vector2(145.0, 56.0)
-	weapon_button.size = Vector2(145.0, 56.0)
-	weapon_button.add_theme_font_size_override("font_size", 15)
-	weapon_button.pressed.connect(player.switch_weapon)
-	_style_button(weapon_button)
-	root.add_child(weapon_button)
-
-	var aim_button := Button.new()
-	aim_button.text = "MIRAR"
-	aim_button.position = Vector2(screen.x - 180.0, screen.y - 295.0)
-	aim_button.custom_minimum_size = Vector2(145.0, 56.0)
-	aim_button.size = Vector2(145.0, 56.0)
-	aim_button.add_theme_font_size_override("font_size", 15)
-	aim_button.button_down.connect(func() -> void: player.set_aiming(true))
-	aim_button.button_up.connect(func() -> void: player.set_aiming(false))
-	_style_button(aim_button)
-	root.add_child(aim_button)
-
-	var sprint_button := Button.new()
-	sprint_button.text = "CORRER"
-	sprint_button.position = Vector2(38.0, screen.y - 270.0)
-	sprint_button.custom_minimum_size = Vector2(145.0, 52.0)
-	sprint_button.size = Vector2(145.0, 52.0)
-	sprint_button.add_theme_font_size_override("font_size", 15)
-	sprint_button.button_down.connect(func() -> void: Input.action_press("sprint"))
-	sprint_button.button_up.connect(func() -> void: Input.action_release("sprint"))
-	if not InputMap.has_action("sprint"):
-		InputMap.add_action("sprint")
-	_style_button(sprint_button)
-	root.add_child(sprint_button)
-
-	var reload_button := Button.new()
-	reload_button.text = "RECARREGAR"
-	reload_button.position = Vector2(screen.x - 180.0, screen.y - 225.0)
-	reload_button.custom_minimum_size = Vector2(145.0, 56.0)
-	reload_button.size = Vector2(145.0, 56.0)
-	reload_button.add_theme_font_size_override("font_size", 15)
-	reload_button.pressed.connect(player.reload)
-	_style_button(reload_button)
-	root.add_child(reload_button)
-
-func _add_hold_button(root: Control, label_text: String, pos: Vector2, action: String) -> void:
-	if not InputMap.has_action(action):
-		InputMap.add_action(action)
+func _add_touch_button(root: Control, label_text: String, pos: Vector2, button_size: Vector2, action: String) -> void:
 	var button := Button.new()
 	button.text = label_text
 	button.position = pos
-	button.custom_minimum_size = Vector2(76.0, 76.0)
-	button.size = Vector2(76.0, 76.0)
-	button.add_theme_font_size_override("font_size", 28)
-	button.button_down.connect(func() -> void: Input.action_press(action))
-	button.button_up.connect(func() -> void: Input.action_release(action))
-	_style_button(button)
+	button.custom_minimum_size = button_size
+	button.size = button_size
+	button.focus_mode = Control.FOCUS_NONE
+	button.add_theme_font_size_override("font_size", 14 if button_size.x < 90.0 else 17)
+	var radius := int(minf(button_size.x, button_size.y) * 0.5) if button_size.x == button_size.y else 16
+	var normal := StyleBoxFlat.new()
+	normal.bg_color = Color(0.035, 0.055, 0.060, 0.78)
+	normal.border_color = Color(0.78, 0.84, 0.76, 0.86)
+	normal.set_border_width_all(2)
+	normal.set_corner_radius_all(radius)
+	var pressed := normal.duplicate() as StyleBoxFlat
+	pressed.bg_color = Color(0.18, 0.38, 0.29, 0.96)
+	button.add_theme_stylebox_override("normal", normal)
+	button.add_theme_stylebox_override("hover", normal)
+	button.add_theme_stylebox_override("pressed", pressed)
+	button.add_theme_color_override("font_color", Color(0.97, 0.98, 0.94))
+	button.add_theme_color_override("font_pressed_color", Color.WHITE)
+	match action:
+		"fire":
+			button.button_down.connect(player.set_firing.bind(true))
+			button.button_up.connect(player.set_firing.bind(false))
+		"aim":
+			button.button_down.connect(player.set_aiming.bind(true))
+			button.button_up.connect(player.set_aiming.bind(false))
+		"jump":
+			button.button_down.connect(func() -> void: Input.action_press("jump"))
+			button.button_up.connect(func() -> void: Input.action_release("jump"))
+		"sprint":
+			button.button_down.connect(func() -> void: Input.action_press("sprint"))
+			button.button_up.connect(func() -> void: Input.action_release("sprint"))
+		"reload":
+			button.pressed.connect(player.reload)
+		"switch":
+			button.pressed.connect(player.switch_weapon)
 	root.add_child(button)
-
 
 func _add_hud_panel(root: Control, rect: Rect2) -> void:
 	var panel := Panel.new()
