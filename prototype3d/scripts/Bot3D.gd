@@ -181,22 +181,6 @@ func _find_animation_player(root: Node) -> AnimationPlayer:
 			return found
 	return null
 
-func _play_model_animation(wanted: String) -> void:
-	if not is_instance_valid(model_animation_player):
-		return
-	var selected: StringName = &""
-	for animation_name in model_animation_player.get_animation_list():
-		if String(animation_name).to_lower().contains(wanted):
-			selected = StringName(animation_name)
-			break
-	if selected == &"" and wanted == "run":
-		for animation_name in model_animation_player.get_animation_list():
-			if String(animation_name).to_lower().contains("walk"):
-				selected = StringName(animation_name)
-				break
-	if selected != &"" and selected != active_model_animation:
-		active_model_animation = selected
-		model_animation_player.play(selected)
 
 func _make_box(size: Vector3, pos: Vector3, material: Material) -> MeshInstance3D:
 	return _make_box_on(self, size, pos, material)
