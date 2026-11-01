@@ -170,7 +170,7 @@ func _build_character() -> void:
 	if character_scene != null:
 		character_model = character_scene.instantiate() as Node3D
 		if character_model != null:
-				character_model.name = "RootNode"
+			character_model.name = "RootNode"
 			character_model.scale = Vector3.ONE
 			# Imported soldier rig faces +Z; the Godot character forward axis is -Z.
 			character_model.rotation.y = PI
