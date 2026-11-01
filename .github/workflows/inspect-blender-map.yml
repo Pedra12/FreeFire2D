@@ -1,0 +1,78 @@
+name: Inspect and convert Blender map
+on:
+  push:
+    branches: [rebuild-3d]
+    paths:
+      - 'free-fire-ful-map.zip'
+      - '.github/workflows/inspect-blender-map.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  inspect-convert:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout project
+        uses: actions/checkout@v4
+
+      - name: Install Blender and unzip
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y blender unzip
+
+      - name: Extract and inspect map archive
+        id: inspect
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/map_source output
+          unzip -q free-fire-ful-map.zip -d /tmp/map_source
+          echo "## Conteúdo do ZIP" > output/inspection.txt
+          find /tmp/map_source -type f -printf '%P (%s bytes)\n' | sort | tee -a output/inspection.txt
+          BLEND_FILE="$(find /tmp/map_source -type f -iname '*.blend' -print -quit)"
+          if [ -z "$BLEND_FILE" ]; then
+            echo "RESULT=NO_BLEND" >> "$GITHUB_OUTPUT"
+            echo "\nERRO: nenhum arquivo .blend encontrado no ZIP." | tee -a output/inspection.txt
+            exit 1
+          fi
+          echo "BLEND_FILE=$BLEND_FILE" >> "$GITHUB_OUTPUT"
+          echo "RESULT=FOUND" >> "$GITHUB_OUTPUT"
+          echo "\nArquivo Blender encontrado: $BLEND_FILE" | tee -a output/inspection.txt
+          echo "\nArquivos auxiliares (texturas/modelos):" | tee -a output/inspection.txt
+          find /tmp/map_source -type f ! -iname '*.blend' -printf '%P (%s bytes)\n' | sort | tee -a output/inspection.txt
+
+      - name: Convert Blender scene to GLB
+        if: steps.inspect.outputs.RESULT == 'FOUND'
+        shell: bash
+        run: |
+          set -euo pipefail
+          cat > /tmp/export_map.py <<'PY'
+          import bpy, os, sys
+          source = os.environ["BLEND_FILE"]
+          target = os.path.abspath("output/free-fire-map.glb")
+          bpy.ops.wm.open_mainfile(filepath=source)
+          # Pack linked image assets into the Blender file before exporting.
+          try:
+              bpy.ops.file.pack_all()
+          except Exception as exc:
+              print("PACK_WARNING:", exc)
+          print("SCENE_OBJECTS:", len(bpy.data.objects))
+          for obj in bpy.data.objects:
+              print("OBJECT:", obj.name, obj.type)
+          bpy.ops.export_scene.gltf(filepath=target, export_format='GLB', export_apply=True)
+          print("EXPORTED:", target, os.path.getsize(target))
+          PY
+          BLEND_FILE="${{ steps.inspect.outputs.BLEND_FILE }}" blender -b --python /tmp/export_map.py 2>&1 | tee output/blender-conversion.log
+          test -s output/free-fire-map.glb
+          ls -lh output/free-fire-map.glb | tee -a output/inspection.txt
+
+      - name: Upload inspection and converted map
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: free-fire-map-inspection
+          path: output/
+          if-no-files-found: warn
+          retention-days: 14
