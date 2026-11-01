@@ -53,7 +53,7 @@ func _ready() -> void:
 
 func _process(_delta: float) -> void:
 	if is_instance_valid(player) and is_instance_valid(game_hud):
-		game_hud.update_hud(player.health, player.armor, 30)
+		game_hud.update_hud(player.health, player.armor, player.ammo)
 
 func spawn_enemies() -> void:
 	var positions: Array[Vector2] = [
