@@ -6,6 +6,8 @@ extends CharacterBody2D
 
 var has_weapon: bool = false
 var can_shoot: bool = true
+var shoot_cooldown: float = 0.0
+const FIRE_INTERVAL: float = 0.25
 
 @onready var sprite: Sprite2D = Sprite2D.new()
 
@@ -21,7 +23,8 @@ func _ready() -> void:
 	col.shape = shape
 	add_child(col)
 
-func _physics_process(_delta: float) -> void:
+func _physics_process(delta: float) -> void:
+	shoot_cooldown = maxf(0.0, shoot_cooldown - delta)
 	var input_vec := Vector2.ZERO
 	input_vec.x = Input.get_action_strength("ui_right") - Input.get_action_strength("ui_left")
 	input_vec.y = Input.get_action_strength("ui_down") - Input.get_action_strength("ui_up")
@@ -45,9 +48,10 @@ func heal(amount: float) -> void:
 	print("Vida: ", health)
 
 func shoot() -> void:
-	if not has_weapon or not can_shoot:
+	if not has_weapon or not can_shoot or shoot_cooldown > 0.0:
 		return
 
+	shoot_cooldown = FIRE_INTERVAL
 	var bullet_script = load("res://scripts/Bullet.gd")
 	var bullet := Area2D.new()
 	bullet.set_script(bullet_script)
@@ -61,3 +65,4 @@ func take_damage(amount: float) -> void:
 	print("Dano recebido! Vida restante: ", health)
 	if health <= 0.0:
 		print("Você foi eliminado!")
+		queue_free()
